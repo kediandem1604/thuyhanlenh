@@ -119,6 +119,20 @@ export interface Me {
   /** @deprecated dùng `org` */
   guild: { id: string; name: string }
   devLogin: boolean
+  /** chủ hệ thống (người giữ ghế đứng đầu bang chính, hoặc khai trong ADMIN_DISCORD_IDS) */
+  isAdmin: boolean
+}
+
+/** Một dòng trong trang Quản trị hệ thống */
+export interface AdminOrgRow {
+  org: OrgInfo
+  /** người đứng đầu hiện tại (Kim Lan: ghế 1) */
+  leader: { memberId: string; name: string; claimed: boolean } | null
+  isMember: boolean
+  isLeader: boolean
+  isFull: boolean
+  /** thành viên chưa có chủ tài khoản — chọn để nhường chỗ khi tổ chức đã đủ người */
+  replaceable: { memberId: string; name: string; title: string; seat: number | null }[]
 }
 
 /** Lời mời vào tổ chức */

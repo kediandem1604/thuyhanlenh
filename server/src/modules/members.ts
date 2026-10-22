@@ -108,7 +108,7 @@ export async function upsertPowerHistory(tx: DbOrTx, characterId: string, power:
     .onConflictDoUpdate({ target: [s.powerHistory.characterId, s.powerHistory.weekStart], set: { power } })
 }
 
-async function activeMembers(tx: DbOrTx, guildId: string) {
+export async function activeMembers(tx: DbOrTx, guildId: string) {
   return tx
     .select({ m: s.members, c: s.characters })
     .from(s.members)
@@ -125,6 +125,35 @@ async function renumberSeats(tx: DbOrTx, orderedIds: string[]) {
       .set({ seat: i + 1, rank: i === 0 ? 'dai-ca' : 'huynh-de' })
       .where(eq(s.members.id, orderedIds[i]))
   }
+}
+
+/**
+ * Đưa một thành viên lên đứng đầu tổ chức.
+ * Kim Lan: lên ghế 1 (Đại ca/tỷ), mọi người lùi một ghế.
+ * Bang / team: người đứng đầu cũ lui xuống chức phó (hết chỗ phó thì xuống bậc kế).
+ */
+export async function makeLeader(tx: DbOrTx, guildId: string, type: OrgType, memberId: string) {
+  if (type === 'kimlan') {
+    const rows = await activeMembers(tx, guildId)
+    await renumberSeats(tx, [memberId, ...rows.map((r) => r.m.id).filter((x) => x !== memberId)])
+    return
+  }
+  const leaderRank = ORG_TYPES[type].leaderRank
+  const deputyRank: RankId = type === 'guild' ? 'pho-bang-chu' : 'pho-nhom'
+  const olds = await tx
+    .select({ id: s.members.id })
+    .from(s.members)
+    .where(and(eq(s.members.guildId, guildId), isNull(s.members.deletedAt), eq(s.members.rank, leaderRank), ne(s.members.id, memberId)))
+  for (const old of olds) {
+    const deputies = await tx
+      .select({ n: sql<number>`count(*)::int` })
+      .from(s.members)
+      .where(and(eq(s.members.guildId, guildId), isNull(s.members.deletedAt), eq(s.members.rank, deputyRank), ne(s.members.id, memberId)))
+    const full = (deputies[0]?.n ?? 0) >= (RANKS[deputyRank].max ?? 2)
+    const fallback: RankId = full ? (type === 'guild' ? 'truong-lao' : 'thanh-vien') : deputyRank
+    await tx.update(s.members).set({ rank: fallback }).where(eq(s.members.id, old.id))
+  }
+  await tx.update(s.members).set({ rank: leaderRank }).where(eq(s.members.id, memberId))
 }
 
 /** Câu chào mừng theo loại tổ chức */
@@ -293,21 +322,11 @@ export async function memberRoutes(app: FastifyInstance) {
       if (type === 'kimlan') {
         // Kim Lan chỉ có một việc "bổ nhiệm": nhường ghế Đại ca
         if (next !== 'dai-ca') throw badRequest('Kim Lan dùng thứ bậc theo ghế — hãy đổi ghế thay vì đổi chức vụ.')
-        const rows = await activeMembers(tx, req.orgId)
-        const order = rows.map((r) => r.m.id).filter((x) => x !== id)
-        await renumberSeats(tx, [id, ...order])
+        await makeLeader(tx, req.orgId, type, id)
         await logActivity(tx, req.orgId, 'promote', `${me.member.name} nhường ghế Đại ca cho ${target.name}`, id)
       } else if (next === info.leaderRank) {
         // truyền ngôi: người đứng đầu cũ lui xuống chức phó (hết chỗ thì xuống bậc kế)
-        const deputyRank: RankId = type === 'guild' ? 'pho-bang-chu' : 'pho-nhom'
-        const deputies = await tx
-          .select({ n: sql<number>`count(*)::int` })
-          .from(s.members)
-          .where(and(eq(s.members.guildId, req.orgId), isNull(s.members.deletedAt), eq(s.members.rank, deputyRank), ne(s.members.id, target.id)))
-        const full = (deputies[0]?.n ?? 0) >= (RANKS[deputyRank].max ?? 2)
-        const fallback: RankId = full ? (type === 'guild' ? 'truong-lao' : 'thanh-vien') : deputyRank
-        await tx.update(s.members).set({ rank: fallback }).where(eq(s.members.id, me.member.id))
-        await tx.update(s.members).set({ rank: next }).where(eq(s.members.id, id))
+        await makeLeader(tx, req.orgId, type, id)
         await logActivity(tx, req.orgId, 'promote', `${me.member.name} truyền ngôi ${RANKS[next].name} cho ${target.name}`, id)
       } else {
         await assertRankSlot(tx, req.orgId, next, id)

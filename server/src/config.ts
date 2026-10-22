@@ -49,6 +49,8 @@ const EnvSchema = z.object({
   DISCORD_API_BASE: proxyBase,
   DISCORD_PROXY_KEY: z.string().optional(),
   BOOTSTRAP_LEADER_DISCORD_ID: z.string().optional(),
+  // (tùy chọn) ID Discord của chủ hệ thống, cách nhau dấu phẩy — ngoài người giữ ghế đứng đầu bang chính
+  ADMIN_DISCORD_IDS: z.string().optional(),
   DEV_LOGIN: z.string().optional(),
   SEED_DEMO: z.string().optional(),
   GUILD_ID: z.string().default('kinh-hong-cac'),
@@ -75,6 +77,8 @@ export interface Config {
     proxyKey?: string
   } | null
   bootstrapLeaderDiscordId?: string
+  /** ID Discord được coi là chủ hệ thống */
+  adminDiscordIds: string[]
   devLogin: boolean
   seedDemo: boolean
   guildId: string
@@ -107,6 +111,10 @@ export function loadConfig(overrides: Partial<Config> = {}, env: NodeJS.ProcessE
     pgliteDir: e.PGLITE_DIR,
     discord,
     bootstrapLeaderDiscordId: e.BOOTSTRAP_LEADER_DISCORD_ID || undefined,
+    adminDiscordIds: (e.ADMIN_DISCORD_IDS ?? '')
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean),
     devLogin: bool(!prod).parse(e.DEV_LOGIN),
     seedDemo: bool(true).parse(e.SEED_DEMO),
     guildId: e.GUILD_ID,

@@ -22,6 +22,7 @@ import { wsRoutes } from './realtime/ws'
 import { coreRoutes } from './modules/core'
 import { memberRoutes } from './modules/members'
 import { orgRoutes } from './modules/orgs'
+import { adminRoutes } from './modules/admin'
 import { mentorshipRoutes } from './modules/mentorships'
 import { bondRoutes } from './modules/bonds'
 import { dungeonRoutes } from './modules/dungeons'
@@ -118,6 +119,7 @@ export async function buildApp(opts: BuildAppOptions) {
   await app.register(coreRoutes)
   await app.register(memberRoutes)
   await app.register(orgRoutes)
+  await app.register(adminRoutes)
   await app.register(mentorshipRoutes)
   await app.register(bondRoutes)
   await app.register(dungeonRoutes)

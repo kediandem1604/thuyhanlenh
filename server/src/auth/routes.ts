@@ -15,6 +15,7 @@ import { logActivity } from '../modules/shared'
 import { createMember } from '../modules/members'
 import { requireUser } from './context'
 import { authorizeUrl, DiscordAuthError, discordAvatarUrl, fetchDiscordUser, type DiscordUser } from './discord'
+import { isSystemAdmin } from '../modules/admin'
 import { clearSessionCookie, createSession, revokeSession, setSessionCookie } from './sessions'
 
 const OAUTH_COOKIE = 'thl_oauth'
@@ -208,6 +209,7 @@ export async function authRoutes(app: FastifyInstance) {
       application: pending,
       guild: current ? { id: current.id, name: current.name } : { id: app.ctx.guildId, name: '' },
       devLogin: config.devLogin,
+      isAdmin: await isSystemAdmin(db(), config, auth.user),
     }
   })
 

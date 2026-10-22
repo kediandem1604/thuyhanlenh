@@ -17,6 +17,7 @@ import { ClassBadge, RankSeal } from '@/components/ui/Badges'
 import { Chibi } from '@/components/chibi/Chibi'
 import { OrgSettingsPanel, Switch } from '@/components/org/OrgSettingsPanel'
 import { InviteManager } from '@/components/org/InviteManager'
+import { AdminPanel } from '@/components/org/AdminPanel'
 import { cn, fmt } from '@/lib/utils'
 
 /* ---------------- Giao diện ---------------- */
@@ -552,6 +553,7 @@ function SectionLabel({ han, title, sub, className }: { han: string; title: Reac
 
 export default function SettingsPage() {
   const org = useOrg()
+  const isAdmin = useGuild((s) => !!s.me?.isAdmin)
   return (
     <div>
       <PageHeader eyebrow="Hệ Thống · Tùy chỉnh" title="Thiết Lập" han="设" description="Thông tin tổ chức và link mời, nhân vật dùng chung, giao diện, quyền của bạn và sao lưu dữ liệu." />
@@ -576,6 +578,13 @@ export default function SettingsPage() {
           <AboutPanel />
         </div>
       </div>
+
+      {isAdmin && (
+        <>
+          <SectionLabel han="管" title="Quản trị hệ thống" sub="Chỉ chủ hệ thống thấy phần này" className="mt-10" />
+          <AdminPanel />
+        </>
+      )}
     </div>
   )
 }
