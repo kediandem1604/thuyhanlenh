@@ -1,0 +1,47 @@
+# Render Blueprint — Thủy Hàn Lệnh
+# Một web service chạy cả API lẫn web (Fastify phục vụ bản build trong dist/) + một CSDL Postgres.
+# Cả hai đặt ở Singapore (gần Việt Nam nhất) và nói chuyện qua mạng riêng của Render.
+# Gói free: web ngủ sau 15 phút không ai vào; CSDL free hết hạn sau 30 ngày → nâng gói trước hạn để giữ dữ liệu.
+
+services:
+  - type: web
+    name: thuy-han-lenh
+    runtime: node
+    region: singapore
+    plan: free
+    # tsx, vite… nằm trong devDependencies nên phải cài cả khi NODE_ENV=production
+    buildCommand: npm ci --include=dev && npm run build
+    # tự chạy migration + nạp dữ liệu mẫu (nếu CSDL trống) rồi mới mở cổng
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: thuy-han-lenh-db
+          property: connectionString
+      # bản online chỉ đăng nhập bằng Discord
+      - key: DEV_LOGIN
+        value: "false"
+      # CSDL trống lần đầu → nạp Kinh Hồng Các, Gia Tộc Họ Bạch, Thất Tinh Đội
+      - key: SEED_DEMO
+        value: "true"
+      - key: TZ
+        value: Asia/Ho_Chi_Minh
+      # khóa ứng dụng Discord — bạn tự dán trong Render Dashboard (không lưu trong mã nguồn)
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      # ID Discord của người được nhận ghế Bang Chủ Kinh Hồng Các khi đăng nhập lần đầu
+      - key: BOOTSTRAP_LEADER_DISCORD_ID
+        sync: false
+
+databases:
+  - name: thuy-han-lenh-db
+    databaseName: thuy_han_lenh
+    region: singapore
+    plan: free
+    # không mở ra internet: chỉ web service qua mạng riêng của Render mới kết nối được
+    ipAllowList: []

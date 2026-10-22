@@ -1,0 +1,34 @@
+# Chạy bản production trên một VPS: docker compose up -d --build
+# Trước đó tạo file .env (xem .env.example) với DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET và WEB_ORIGIN là địa chỉ công khai.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: thuyhanlenh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-doi-mat-khau-nay}
+      POSTGRES_DB: thuyhanlenh
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U thuyhanlenh']
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://thuyhanlenh:${POSTGRES_PASSWORD:-doi-mat-khau-nay}@db:5432/thuyhanlenh
+      NODE_ENV: production
+      DEV_LOGIN: 'false'
+      SERVE_WEB: 'true'
+    ports:
+      - '8787:8787'
+
+volumes:
+  pgdata:

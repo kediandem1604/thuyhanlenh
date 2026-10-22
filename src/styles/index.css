@@ -1,0 +1,1134 @@
+@import "tailwindcss";
+
+@custom-variant light (&:where([data-theme=light], [data-theme=light] *));
+
+/* ================================================================
+   TOKENS — chủ đề "Dạ Thủy Mặc" (mặc định) và "Tuyên Chỉ" (sáng)
+   Giao diện tổ chức "Kinh Hồng" (vàng, hoa đào) chính là bộ token gốc này.
+   `[data-org-theme="kinh-hong"]` có trong selector để có thể đặt lại về
+   mặc định trên một phần tử con (vd. khung xem trước) khi <html> mang giao diện khác.
+   ================================================================ */
+:root,
+[data-theme="dark"],
+[data-org-theme="kinh-hong"] {
+  color-scheme: dark;
+  --bg: #090c15;
+  --bg-2: #0e1322;
+  --bg-3: #141a2d;
+  --surface: rgba(21, 27, 46, 0.66);
+  --surface-2: rgba(30, 38, 62, 0.72);
+  --surface-solid: #131a2c;
+  --line: rgba(216, 180, 106, 0.16);
+  --line-strong: rgba(216, 180, 106, 0.38);
+  --text: #eee6d6;
+  --text-2: #c9c2b3;
+  --muted: #8d93a8;
+  --gold: #d8b46a;
+  --gold-2: #f3dca0;
+  --gold-3: #a27c38;
+  --jade: #5ec7b0;
+  --cinnabar: #e0523f;
+  --sakura: #f2a7bf;
+  --violet: #a08cf5;
+  --azure: #6fa8ff;
+  --ember: #f08a4b;
+  --shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.7);
+  --glow-gold: 0 0 0 1px rgba(216, 180, 106, 0.25), 0 10px 40px -10px rgba(216, 180, 106, 0.25);
+  --mountain-1: #1a2238;
+  --mountain-2: #141b2e;
+  --mountain-3: #0f1525;
+  --moon: #f6e7c4;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d8b46a' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+
+  /* — các token dưới đây không đổi theo Dạ/Nhật (trừ khi giao diện tổ chức đặt lại) — */
+  /* nền nút vàng / ô được chọn: dùng `bg-gold-grad` + `text-on-gold` thay cho gradient viết cứng */
+  --gold-grad: linear-gradient(135deg, #f6e2ac 0%, #d8b46a 45%, #b48a3e 100%);
+  --on-gold: #1b1406;
+  --gold-shadow: rgba(216, 180, 106, 0.7);
+  --gold-shadow-strong: rgba(216, 180, 106, 0.85);
+  /* ấn triện */
+  --seal-bg: radial-gradient(circle at 30% 25%, #f0806a, #b92f22 70%);
+  --seal-ink: #fff1e6;
+  --seal-ring: rgba(255, 230, 210, 0.55);
+  --seal-shadow: rgba(185, 47, 34, 0.8);
+  --seal-aura: rgba(224, 82, 63, 0.6);
+  /* màn ăn mừng — nền luôn tối */
+  --celebrate-core: rgba(46, 34, 16, 0.82);
+  --celebrate-grad: linear-gradient(100deg, #fbeec8 0%, #e2c27c 40%, #c9a052 70%, #fbeec8 100%);
+  --celebrate-text: #eee6d6;
+  /* sắc nền phụ của phông (sương ngọc / tím) */
+  --backdrop-b: var(--jade);
+  --backdrop-c: var(--violet);
+  /* khung panel: lớp sáng phía trên, viền trong, quầng sương giá (Bạch Gia) */
+  --panel-sheen: none;
+  --panel-edge: rgba(255, 255, 255, 0.04);
+  --panel-frost: 0 0 #0000;
+  --vignette-color: transparent;
+
+  /* — hạt rơi / hạc / tuyết (đổi theo Dạ/Nhật để luôn nhìn thấy) — */
+  --flake: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 28%, rgba(220, 234, 255, 0.5) 50%, rgba(220, 234, 255, 0) 70%);
+  --flake-shadow: 0 0 4px rgba(220, 235, 255, 0.3);
+  --petal-edge: 0 0 6px rgba(255, 255, 255, 0.22);
+  --blossom-edge: rgba(255, 255, 255, 0);
+  --snow-cap: #eef4fc;
+  --snow-haze: rgba(225, 236, 252, 0.75);
+  --crane-fill: #eef3f9;
+  --crane-ink: #4a5570;
+  --crane-line: rgba(255, 255, 255, 0);
+}
+
+[data-theme="light"],
+[data-theme="light"] [data-org-theme="kinh-hong"] {
+  color-scheme: light;
+  --bg: #efe5d2;
+  --bg-2: #e8dcc5;
+  --bg-3: #dfd0b5;
+  --surface: rgba(255, 250, 240, 0.72);
+  --surface-2: rgba(255, 252, 246, 0.86);
+  --surface-solid: #fbf5e9;
+  --line: rgba(124, 88, 36, 0.18);
+  --line-strong: rgba(124, 88, 36, 0.4);
+  --text: #2b231b;
+  --text-2: #4a3f33;
+  --muted: #7b6f60;
+  --gold: #a47a32;
+  --gold-2: #7d5a1f;
+  --gold-3: #c9a25a;
+  --jade: #2f8f7c;
+  --cinnabar: #c23a28;
+  --sakura: #d06a8c;
+  --violet: #6c58c9;
+  --azure: #3a6fc4;
+  --ember: #c9631f;
+  --shadow: 0 18px 40px -22px rgba(80, 55, 20, 0.45);
+  --glow-gold: 0 0 0 1px rgba(164, 122, 50, 0.25), 0 10px 30px -12px rgba(164, 122, 50, 0.35);
+  --mountain-1: #c9bca3;
+  --mountain-2: #b9aa8e;
+  --mountain-3: #a8987b;
+  --moon: #c0392b;
+
+  --flake: radial-gradient(circle, #ffffff 0 42%, rgba(150, 172, 208, 0.9) 60%, rgba(150, 172, 208, 0) 76%);
+  --flake-shadow: 0 0 0 0.5px rgba(110, 135, 175, 0.35), 0 1px 3px rgba(60, 85, 125, 0.3);
+  --petal-edge: 0 0 0 0.6px rgba(150, 110, 130, 0.4);
+  --blossom-edge: rgba(150, 110, 130, 0.45);
+  --snow-cap: #ffffff;
+  --snow-haze: rgba(120, 145, 185, 0.55);
+  --crane-fill: #ffffff;
+  --crane-ink: #26303f;
+  --crane-line: rgba(70, 92, 125, 0.55);
+}
+
+/* ================================================================
+   GIAO DIỆN TỔ CHỨC — <html data-org-theme="…"> (đặt bởi ThemeSync)
+   Thiếu thuộc tính = Kinh Hồng (bộ token gốc ở trên).
+   Quy ước: khối Dạ `[data-org-theme=X]` cũng khớp khi đang Nhật, nên khối
+   Nhật của cùng giao diện PHẢI đặt lại mọi token phụ thuộc Dạ/Nhật mà khối Dạ đặt.
+   Tương phản chữ nhấn (--gold / --gold-2) ≥ 4.5:1 trên bg, bg-2, surface,
+   surface-2, surface-solid ở cả hai chế độ (đã tính, xem báo cáo).
+   ================================================================ */
+
+/* ---------- Bạch Gia 白 — bạch kim, tuyết, bạch mai, hạc trắng ---------- */
+[data-org-theme="bach-gia"] {
+  --bg: #070b16;
+  --bg-2: #0c1325;
+  --bg-3: #131b30;
+  --surface: rgba(19, 28, 48, 0.66);
+  --surface-2: rgba(28, 39, 66, 0.72);
+  --surface-solid: #111a2e;
+  --line: rgba(196, 214, 236, 0.15);
+  --line-strong: rgba(196, 214, 236, 0.36);
+  --text: #e8edf4;
+  --text-2: #c2cad7;
+  --muted: #8b95aa;
+  --gold: #c3d2e6;
+  --gold-2: #eef4fb;
+  --gold-3: #7f95b2;
+  --shadow: 0 18px 50px -20px rgba(0, 2, 10, 0.75);
+  --glow-gold: 0 0 0 1px rgba(195, 210, 230, 0.26), 0 10px 40px -10px rgba(170, 200, 240, 0.3);
+  --mountain-1: #1d2744;
+  --mountain-2: #161f38;
+  --mountain-3: #0e1529;
+  --moon: #e6edf7;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c3d2e6' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  --gold-grad: linear-gradient(135deg, #ffffff 0%, #d5e0ee 45%, #9fb3cc 100%);
+  --on-gold: #141c2a;
+  --gold-shadow: rgba(170, 198, 232, 0.6);
+  --gold-shadow-strong: rgba(190, 214, 245, 0.8);
+  --panel-sheen: radial-gradient(120% 60% at 50% 0%, rgba(215, 232, 255, 0.07), transparent 62%);
+  --panel-edge: rgba(225, 238, 255, 0.1);
+  --panel-frost: 0 0 0 1px rgba(205, 225, 250, 0.035), 0 0 32px -12px rgba(160, 200, 245, 0.28);
+  --vignette-color: rgba(140, 180, 235, 0.13);
+  /* không đổi theo Dạ/Nhật */
+  --seal-bg: radial-gradient(circle at 30% 25%, #9fb6d4, #2c4466 70%);
+  --seal-ink: #f3f7fc;
+  --seal-ring: rgba(230, 240, 252, 0.6);
+  --seal-shadow: rgba(44, 68, 102, 0.85);
+  --seal-aura: rgba(170, 205, 245, 0.55);
+  --celebrate-core: rgba(28, 38, 58, 0.84);
+  --celebrate-grad: linear-gradient(100deg, #ffffff 0%, #d6e2f0 40%, #a9bcd4 70%, #ffffff 100%);
+  --celebrate-text: #e8eef6;
+  --backdrop-b: #7fa6d9;
+  --backdrop-c: #9aa7d6;
+}
+[data-theme="light"][data-org-theme="bach-gia"],
+[data-theme="light"] [data-org-theme="bach-gia"] {
+  --bg: #e8ecf1;
+  --bg-2: #dfe5ec;
+  --bg-3: #d3dbe5;
+  --surface: rgba(250, 252, 255, 0.74);
+  --surface-2: rgba(253, 254, 255, 0.88);
+  --surface-solid: #f6f8fb;
+  --line: rgba(64, 90, 128, 0.18);
+  --line-strong: rgba(64, 90, 128, 0.4);
+  --text: #1e2430;
+  --text-2: #3c4556;
+  --muted: #596478;
+  --gold: #43597a;
+  --gold-2: #2c4064;
+  --gold-3: #9cb0c8;
+  --shadow: 0 18px 40px -22px rgba(30, 50, 85, 0.4);
+  --glow-gold: 0 0 0 1px rgba(67, 89, 122, 0.22), 0 10px 30px -12px rgba(67, 89, 122, 0.32);
+  --mountain-1: #c5cdd8;
+  --mountain-2: #b3bdcb;
+  --mountain-3: #a1adbf;
+  --moon: #aebdd1;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2343597a' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  --gold-grad: linear-gradient(135deg, #f4f8fc 0%, #c4d2e3 45%, #8fa4c0 100%);
+  --on-gold: #121a27;
+  --gold-shadow: rgba(70, 98, 138, 0.45);
+  --gold-shadow-strong: rgba(70, 98, 138, 0.6);
+  --panel-sheen: radial-gradient(120% 60% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 62%);
+  --panel-edge: rgba(255, 255, 255, 0.75);
+  --panel-frost: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 0 26px -12px rgba(110, 150, 205, 0.32);
+  --vignette-color: rgba(120, 150, 195, 0.16);
+}
+
+/* ---------- Thanh Ngọc 玉 — ngọc bích, lá trúc ---------- */
+[data-org-theme="thanh-ngoc"] {
+  --line: rgba(94, 199, 176, 0.16);
+  --line-strong: rgba(94, 199, 176, 0.38);
+  --gold: #5ec7b0;
+  --gold-2: #a8ecda;
+  --gold-3: #2f8a76;
+  --glow-gold: 0 0 0 1px rgba(94, 199, 176, 0.25), 0 10px 40px -10px rgba(94, 199, 176, 0.25);
+  --mountain-1: #172636;
+  --mountain-2: #121e2d;
+  --mountain-3: #0d1522;
+  --moon: #e8f3ea;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235ec7b0' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  /* không đổi theo Dạ/Nhật */
+  --gold-grad: linear-gradient(135deg, #c4f2e4 0%, #5ec7b0 45%, #3a9d87 100%);
+  --on-gold: #03201a;
+  --gold-shadow: rgba(94, 199, 176, 0.6);
+  --gold-shadow-strong: rgba(94, 199, 176, 0.8);
+  --celebrate-core: rgba(10, 40, 34, 0.82);
+  --celebrate-grad: linear-gradient(100deg, #e4fbf4 0%, #8fdcc8 40%, #4fae96 70%, #e4fbf4 100%);
+  --celebrate-text: #e8f1ec;
+}
+[data-theme="light"][data-org-theme="thanh-ngoc"],
+[data-theme="light"] [data-org-theme="thanh-ngoc"] {
+  --line: rgba(23, 98, 79, 0.18);
+  --line-strong: rgba(23, 98, 79, 0.4);
+  --gold: #17624f;
+  --gold-2: #104a3d;
+  --gold-3: #6cbca6;
+  --glow-gold: 0 0 0 1px rgba(23, 98, 79, 0.22), 0 10px 30px -12px rgba(23, 98, 79, 0.32);
+  --mountain-1: #c0c5aa;
+  --mountain-2: #aeb596;
+  --mountain-3: #9ca483;
+  --moon: #c0392b;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2317624f' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------- Hồng Liên 莲 — son đỏ, cánh sen hồng ---------- */
+[data-org-theme="hong-lien"] {
+  --line: rgba(236, 129, 114, 0.16);
+  --line-strong: rgba(236, 129, 114, 0.38);
+  --gold: #ec8172;
+  --gold-2: #f9b9ab;
+  --gold-3: #b24c3d;
+  --glow-gold: 0 0 0 1px rgba(236, 129, 114, 0.25), 0 10px 40px -10px rgba(236, 129, 114, 0.25);
+  --mountain-1: #201d33;
+  --mountain-2: #19172b;
+  --mountain-3: #121120;
+  --moon: #f9e4d8;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ec8172' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  /* không đổi theo Dạ/Nhật */
+  --gold-grad: linear-gradient(135deg, #ffd9cf 0%, #f0907f 45%, #da6a5b 100%);
+  --on-gold: #2a0905;
+  --gold-shadow: rgba(236, 129, 114, 0.6);
+  --gold-shadow-strong: rgba(236, 129, 114, 0.8);
+  --celebrate-core: rgba(54, 18, 16, 0.82);
+  --celebrate-grad: linear-gradient(100deg, #ffe8e1 0%, #f6a796 40%, #d8665a 70%, #ffe8e1 100%);
+  --celebrate-text: #f3e6df;
+}
+[data-theme="light"][data-org-theme="hong-lien"],
+[data-theme="light"] [data-org-theme="hong-lien"] {
+  --line: rgba(156, 47, 33, 0.18);
+  --line-strong: rgba(156, 47, 33, 0.4);
+  --gold: #9c2f21;
+  --gold-2: #7c2418;
+  --gold-3: #e2907f;
+  --glow-gold: 0 0 0 1px rgba(156, 47, 33, 0.22), 0 10px 30px -12px rgba(156, 47, 33, 0.3);
+  --mountain-1: #cdb9a7;
+  --mountain-2: #bea793;
+  --mountain-3: #ad9580;
+  --moon: #c0392b;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c2f21' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------- Tử Đằng 藤 — tím tử đằng, hoa rủ ---------- */
+[data-org-theme="tu-dang"] {
+  --line: rgba(185, 161, 246, 0.16);
+  --line-strong: rgba(185, 161, 246, 0.38);
+  --gold: #b9a1f6;
+  --gold-2: #ddd0fd;
+  --gold-3: #7a5fc4;
+  --glow-gold: 0 0 0 1px rgba(185, 161, 246, 0.25), 0 10px 40px -10px rgba(185, 161, 246, 0.25);
+  --mountain-1: #1d1d3c;
+  --mountain-2: #171731;
+  --mountain-3: #101024;
+  --moon: #eee8f9;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b9a1f6' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  /* không đổi theo Dạ/Nhật */
+  --gold-grad: linear-gradient(135deg, #ece4ff 0%, #b9a1f6 45%, #9479e6 100%);
+  --on-gold: #160b33;
+  --gold-shadow: rgba(185, 161, 246, 0.6);
+  --gold-shadow-strong: rgba(185, 161, 246, 0.8);
+  --seal-bg: radial-gradient(circle at 30% 25%, #b47ad3, #5a2b84 70%);
+  --seal-ink: #fbf2ff;
+  --seal-ring: rgba(240, 225, 255, 0.55);
+  --seal-shadow: rgba(90, 43, 132, 0.8);
+  --seal-aura: rgba(170, 120, 230, 0.55);
+  --celebrate-core: rgba(36, 22, 58, 0.84);
+  --celebrate-grad: linear-gradient(100deg, #f3eeff 0%, #cbb8fa 40%, #9a80e8 70%, #f3eeff 100%);
+  --celebrate-text: #ece6f6;
+}
+[data-theme="light"][data-org-theme="tu-dang"],
+[data-theme="light"] [data-org-theme="tu-dang"] {
+  --line: rgba(91, 63, 168, 0.18);
+  --line-strong: rgba(91, 63, 168, 0.4);
+  --gold: #5b3fa8;
+  --gold-2: #432d84;
+  --gold-3: #b6a1ec;
+  --glow-gold: 0 0 0 1px rgba(91, 63, 168, 0.22), 0 10px 30px -12px rgba(91, 63, 168, 0.32);
+  --mountain-1: #c6bdc2;
+  --mountain-2: #b5abb3;
+  --mountain-3: #a398a3;
+  --moon: #c0392b;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b3fa8' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-solid: var(--surface-solid);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-2: var(--gold-2);
+  --color-gold-3: var(--gold-3);
+  --color-on-gold: var(--on-gold);
+  --color-jade: var(--jade);
+  --color-cinnabar: var(--cinnabar);
+  --color-sakura: var(--sakura);
+  --color-violet: var(--violet);
+  --color-azure: var(--azure);
+  --color-ember: var(--ember);
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", "Be Vietnam Pro", Georgia, serif;
+  --font-han: "Ma Shan Zheng", "KaiTi", "STKaiti", serif;
+}
+
+/* nền "vàng" theo giao diện tổ chức — thay cho linear-gradient(135deg,#f6e2ac,#d8b46a,#b48a3e) viết cứng */
+@utility bg-gold-grad {
+  background-image: var(--gold-grad);
+}
+
+/* ================================================================
+   BASE
+   ================================================================ */
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--gold) 40%, transparent);
+    color: var(--text);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--gold) 35%, transparent) transparent;
+  }
+  button {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--gold) 80%, transparent);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+/* ================================================================
+   COMPONENTS
+   ================================================================ */
+@layer components {
+  /* Khung "sơn mài" — thẻ nền chính */
+  .panel {
+    position: relative;
+    background:
+      var(--panel-sheen),
+      linear-gradient(180deg, color-mix(in oklab, var(--surface-2) 70%, transparent), var(--surface)),
+      var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 var(--panel-edge),
+      var(--panel-frost);
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  }
+  .panel-hover {
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+  .panel-hover:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow), var(--glow-gold);
+  }
+
+  /* Góc viền vàng kiểu khung tranh cổ */
+  .corners::before,
+  .corners::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+    opacity: 0.8;
+  }
+  .corners::before {
+    top: 7px;
+    left: 7px;
+    border-top: 1.5px solid;
+    border-left: 1.5px solid;
+    border-top-left-radius: 6px;
+  }
+  .corners::after {
+    bottom: 7px;
+    right: 7px;
+    border-bottom: 1.5px solid;
+    border-right: 1.5px solid;
+    border-bottom-right-radius: 6px;
+  }
+
+  .title-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+  }
+  .han {
+    font-family: var(--font-han);
+    font-weight: 400;
+  }
+
+  .text-gold-grad {
+    background: linear-gradient(100deg, var(--gold-2) 0%, var(--gold) 40%, var(--gold-3) 70%, var(--gold-2) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* đổi màu chữ theo bậc (~20 lần/giây) thay vì mỗi khung hình: ánh kim trôi chậm nên mắt không thấy khác,
+       nhưng trình duyệt vẽ lại chữ ít hơn 3–7 lần */
+    animation: shimmer-text 8s steps(160) infinite;
+  }
+
+  /* quầng mờ giúp chữ tiêu đề nổi trên nền trăng / núi (dùng filter để không làm bẩn chữ gradient) */
+  .text-halo {
+    filter: drop-shadow(0 1px 8px rgba(5, 7, 14, 0.75)) drop-shadow(0 0 2px rgba(5, 7, 14, 0.55));
+  }
+  [data-theme="light"] .text-halo {
+    filter: drop-shadow(0 1px 8px rgba(255, 250, 240, 0.9)) drop-shadow(0 0 2px rgba(255, 250, 240, 0.8));
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* Nút bấm */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--text);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .btn:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+  /* nút khóa vẫn nhận rê chuột để hiện title (vd "Cần chức vụ … trở lên"); trình duyệt tự chặn click */
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+  }
+  .btn:disabled:hover {
+    transform: none;
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  .btn-gold {
+    color: var(--on-gold);
+    border-color: transparent;
+    background: var(--gold-grad);
+    box-shadow:
+      0 8px 24px -10px var(--gold-shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .btn-gold:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      0 12px 30px -10px var(--gold-shadow-strong),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .btn-cinnabar {
+    color: #fff4ec;
+    border-color: transparent;
+    background: linear-gradient(135deg, #f07a62, #c8372d);
+    box-shadow: 0 8px 22px -10px rgba(224, 82, 63, 0.8);
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+  }
+  .btn-ghost:hover {
+    background: var(--surface-2);
+    border-color: var(--line);
+  }
+  .btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12.5px;
+    border-radius: 10px;
+  }
+  .btn-icon {
+    width: 38px;
+    padding: 0;
+  }
+
+  /* Ô nhập liệu */
+  .field {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--bg) 55%, transparent);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 14px;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .field::placeholder {
+    color: var(--muted);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--line-strong);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 18%, transparent);
+  }
+  textarea.field {
+    height: auto;
+    padding: 10px 14px;
+    resize: vertical;
+  }
+  select.field {
+    appearance: none;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+  }
+  select.field option {
+    background: var(--surface-solid);
+    color: var(--text);
+  }
+  .label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Nhãn nhỏ */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+
+  /* Ấn triện đỏ */
+  .seal {
+    display: inline-grid;
+    place-items: center;
+    font-family: var(--font-han);
+    color: var(--seal-ink);
+    background: var(--seal-bg);
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 0 2px var(--seal-ring),
+      0 6px 16px -6px var(--seal-shadow);
+  }
+
+  /* Đường kẻ vân mây */
+  .divider-cloud {
+    height: 12px;
+    background:
+      radial-gradient(circle at 6px 6px, transparent 4px, var(--line-strong) 4.5px, transparent 5.5px) 0 0 / 24px 12px repeat-x;
+    opacity: 0.6;
+  }
+
+  .progress-track {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--bg) 70%, transparent);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--gold-3), var(--gold), var(--gold-2));
+    box-shadow: 0 0 14px color-mix(in oklab, var(--gold) 60%, transparent);
+  }
+  .progress-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: translateX(-100%);
+    animation: sheen 2.8s ease-in-out infinite;
+  }
+
+  .table-ink {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .table-ink th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .table-ink td {
+    padding: 10px 14px;
+    border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
+    vertical-align: middle;
+  }
+  .table-ink tbody tr {
+    transition: background 0.2s;
+  }
+  .table-ink tbody tr:hover {
+    background: color-mix(in oklab, var(--gold) 6%, transparent);
+  }
+
+  .scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid var(--line-strong);
+    color: var(--text-2);
+    background: var(--surface-2);
+  }
+}
+
+/* ================================================================
+   NỀN — sương, giấy, núi
+   ================================================================ */
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 78% -10%, color-mix(in oklab, var(--gold) 14%, transparent), transparent 60%),
+    radial-gradient(900px 600px at -10% 30%, color-mix(in oklab, var(--backdrop-b) 10%, transparent), transparent 60%),
+    radial-gradient(900px 700px at 60% 120%, color-mix(in oklab, var(--backdrop-c) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 60%);
+}
+.app-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-theme="light"] .app-grain {
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+}
+
+.mist {
+  position: absolute;
+  /* quầng mềm vẽ bằng gradient (không dùng filter: blur — blur 60px trên khối lớn phải tính lại mỗi khung hình) */
+  background: radial-gradient(closest-side, var(--mist) 30%, color-mix(in oklab, var(--mist) 45%, transparent) 62%, transparent 100%);
+  opacity: 0.35;
+  will-change: transform;
+  animation: mist-drift 28s ease-in-out infinite alternate;
+}
+
+/* ================================================================
+   HIỆU ỨNG THEO GIAO DIỆN TỔ CHỨC (src/components/fx)
+   Chỉ animate translate / rotate / transform / opacity → chạy trên compositor.
+   ================================================================ */
+.fx-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+/* một hạt = 3 animation độc lập: rơi (translate), đung đưa (transform), xoay (rotate) */
+.fx-p {
+  position: absolute;
+  top: 0;
+  display: block;
+  opacity: 0;
+  animation:
+    fx-fall var(--dur, 20s) linear var(--delay, 0s) infinite,
+    fx-sway var(--sway, 4s) ease-in-out var(--delay, 0s) infinite alternate,
+    fx-spin var(--spin, 8s) linear var(--delay, 0s) infinite;
+}
+/* bông tuyết tròn mềm — không cần xoay */
+.fx-flake {
+  border-radius: 50%;
+  background: var(--flake);
+  box-shadow: var(--flake-shadow);
+  animation:
+    fx-fall var(--dur, 20s) linear var(--delay, 0s) infinite,
+    fx-sway var(--sway, 4s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+.fx-flake-near {
+  filter: blur(1.4px);
+}
+/* cánh bạch mai */
+.fx-plum {
+  border-radius: 55% 55% 50% 50% / 68% 68% 32% 32%;
+  background: radial-gradient(circle at 50% 92%, #f2b3c4 0 12%, #fde6ec 34%, #ffffff 64%);
+  box-shadow: var(--petal-edge);
+}
+.fx-blossom {
+  overflow: visible;
+}
+/* lá trúc */
+.fx-leaf {
+  border-radius: 0 100% 0 100%;
+  background: linear-gradient(100deg, var(--c1) 0%, var(--c2) 58%, var(--c3) 100%);
+}
+/* cánh sen hồng — hình cánh (mask SVG): đầu nhọn hồng đậm, gốc tròn trắng ngà, gân giữa */
+.fx-lotus {
+  background:
+    linear-gradient(90deg, transparent 46%, rgba(226, 104, 146, 0.32) 50%, transparent 54%),
+    linear-gradient(0deg, #fff5f8 0%, #fbd3de 42%, #ef8fb0 100%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 30'%3E%3Cpath d='M10 0C15 7 19 15 17 22C15.5 27 12.5 30 10 30C7.5 30 4.5 27 3 22C1 15 5 7 10 0Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 30'%3E%3Cpath d='M10 0C15 7 19 15 17 22C15.5 27 12.5 30 10 30C7.5 30 4.5 27 3 22C1 15 5 7 10 0Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+/* cánh tử đằng */
+.fx-wisteria {
+  border-radius: 60% 60% 60% 12%;
+  background: radial-gradient(circle at 35% 30%, var(--c2), var(--c1) 75%);
+}
+
+/* hạc trắng bay ngang trời (Bạch Gia) */
+.fx-cranes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fx-crane {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  transform: translate3d(-180px, 0, 0);
+  animation: fx-crane-cross var(--dur, 90s) linear var(--delay, 0s) infinite;
+}
+.fx-crane > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  animation: fx-crane-bob 7s ease-in-out var(--delay, 0s) infinite alternate;
+}
+.fx-crane-wings {
+  transform-box: view-box;
+  transform-origin: 58px 30px;
+  animation: fx-crane-flap 4.6s ease-in-out var(--flap-delay, 0s) infinite;
+}
+
+/* tuyết xa: lớp chấm lặp lại trượt xuống đúng một chu kỳ (720px) → vòng lặp liền mạch.
+   Mỗi lớp nền = 1 chấm/ô, ô to và bề ngang lệch nhau để không lộ lưới; bề dọc chia hết 720px. */
+.fx-snow-haze {
+  position: absolute;
+  inset: -720px 0 0 0;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 40px 60px, var(--snow-haze) 0 1.1px, transparent 1.8px),
+    radial-gradient(circle at 210px 170px, var(--snow-haze) 0 1.4px, transparent 2.2px),
+    radial-gradient(circle at 120px 520px, var(--snow-haze) 0 0.9px, transparent 1.6px),
+    radial-gradient(circle at 300px 260px, var(--snow-haze) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 70px 610px, var(--snow-haze) 0 1.6px, transparent 2.7px),
+    radial-gradient(circle at 260px 90px, var(--snow-haze) 0 0.7px, transparent 1.4px),
+    radial-gradient(circle at 180px 300px, var(--snow-haze) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 20px 200px, var(--snow-haze) 0 1.2px, transparent 2px);
+  background-size:
+    389px 360px,
+    433px 240px,
+    467px 720px,
+    353px 360px,
+    499px 720px,
+    379px 240px,
+    457px 360px,
+    311px 720px;
+  animation: fx-snow-haze 64s linear infinite;
+}
+.fx-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 95% at 50% 40%, transparent 55%, var(--vignette-color) 100%);
+}
+.fx-moon-halo {
+  position: absolute;
+  inset: -42%;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--moon) 16%, transparent);
+  box-shadow:
+    inset 0 0 36px 4px color-mix(in oklab, var(--moon) 7%, transparent),
+    0 0 28px 2px color-mix(in oklab, var(--moon) 6%, transparent);
+}
+
+/* ================================================================
+   CHIBI
+   ================================================================ */
+.chibi-bob {
+  animation: chibi-bob 3.2s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+.chibi-blink {
+  animation: chibi-blink 5.5s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.chibi-float {
+  animation: chibi-float 4s ease-in-out infinite;
+}
+.chibi-sway {
+  animation: chibi-sway 6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+.chibi-twinkle {
+  animation: twinkle 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.chibi-rise {
+  animation: rise 4.5s ease-in infinite;
+}
+/* chibi ngoài màn hình: tạm dừng mọi chuyển động (xem Chibi.tsx) */
+.chibi-off,
+.chibi-off * {
+  animation-play-state: paused !important;
+}
+
+/* ================================================================
+   KEYFRAMES
+   ================================================================ */
+@keyframes shimmer-text {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes mist-drift {
+  from {
+    transform: translate3d(-4%, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, -3%, 0) scale(1.15);
+  }
+}
+@keyframes chibi-bob {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-3px) scaleY(1.01);
+  }
+}
+@keyframes chibi-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes chibi-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes chibi-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+@keyframes rise {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-34px);
+    opacity: 0;
+  }
+}
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--drift, 80px), 110vh, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+@keyframes fx-fall {
+  0% {
+    translate: 0 -6vh;
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--o, 0.85);
+  }
+  85% {
+    opacity: var(--o, 0.85);
+  }
+  100% {
+    translate: var(--drift, 0px) 106vh;
+    opacity: 0;
+  }
+}
+@keyframes fx-sway {
+  from {
+    transform: translateX(calc(var(--amp, 12px) * -1));
+  }
+  to {
+    transform: translateX(var(--amp, 12px));
+  }
+}
+@keyframes fx-spin {
+  from {
+    rotate: var(--axis, 0 0 1) 0deg;
+  }
+  to {
+    rotate: var(--axis, 0 0 1) var(--turn, 360deg);
+  }
+}
+@keyframes fx-crane-cross {
+  0% {
+    transform: translate3d(-180px, 0, 0);
+    opacity: 0;
+  }
+  4%,
+  40% {
+    opacity: var(--o, 0.9);
+  }
+  44%,
+  100% {
+    transform: translate3d(calc(100vw + 60px), var(--rise, -6vh), 0);
+    opacity: 0;
+  }
+}
+@keyframes fx-crane-bob {
+  from {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+  to {
+    transform: translateY(5px) rotate(1deg);
+  }
+}
+@keyframes fx-crane-flap {
+  0%,
+  30%,
+  100% {
+    transform: scaleY(1);
+  }
+  14%,
+  44% {
+    transform: scaleY(-0.42);
+  }
+  60% {
+    transform: scaleY(0.94);
+  }
+}
+@keyframes fx-snow-haze {
+  to {
+    transform: translate3d(0, 720px, 0);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* vòng sóng quanh chấm "đang trực tuyến": phóng to + mờ dần (chạy trên GPU, không vẽ lại) */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+.pulse-online::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--jade);
+  pointer-events: none;
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* hạt rơi và hạc bay: tắt hẳn (không chỉ dừng) */
+  .fx-particles,
+  .fx-cranes {
+    display: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
