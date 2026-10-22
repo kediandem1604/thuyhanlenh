@@ -21,6 +21,9 @@ const EnvSchema = z.object({
   DISCORD_CLIENT_ID: z.string().optional(),
   DISCORD_CLIENT_SECRET: z.string().optional(),
   DISCORD_REDIRECT_URI: z.string().optional(),
+  // (tùy chọn) trạm chuyển tiếp API Discord — dùng khi IP máy chủ bị Discord chặn 429 (vd Render dùng chung IP)
+  DISCORD_API_BASE: z.string().url().optional(),
+  DISCORD_PROXY_KEY: z.string().optional(),
   BOOTSTRAP_LEADER_DISCORD_ID: z.string().optional(),
   DEV_LOGIN: z.string().optional(),
   SEED_DEMO: z.string().optional(),
@@ -38,7 +41,15 @@ export interface Config {
   databaseUrl?: string
   /** thư mục PGlite, hoặc 'memory' cho test */
   pgliteDir: string
-  discord: { clientId: string; clientSecret: string; redirectUri: string } | null
+  discord: {
+    clientId: string
+    clientSecret: string
+    redirectUri: string
+    /** gốc API Discord (mặc định https://discord.com/api/v10; hoặc địa chỉ trạm chuyển tiếp) */
+    apiBase?: string
+    /** khóa gửi kèm header x-proxy-key để trạm chuyển tiếp không thành proxy mở */
+    proxyKey?: string
+  } | null
   bootstrapLeaderDiscordId?: string
   devLogin: boolean
   seedDemo: boolean
@@ -59,6 +70,8 @@ export function loadConfig(overrides: Partial<Config> = {}, env: NodeJS.ProcessE
           clientId: e.DISCORD_CLIENT_ID,
           clientSecret: e.DISCORD_CLIENT_SECRET,
           redirectUri: e.DISCORD_REDIRECT_URI || `${webOrigin}/auth/discord/callback`,
+          apiBase: e.DISCORD_API_BASE?.replace(/\/$/, '') || undefined,
+          proxyKey: e.DISCORD_PROXY_KEY?.trim() || undefined,
         }
       : null
   const config: Config = {

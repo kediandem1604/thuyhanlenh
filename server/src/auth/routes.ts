@@ -135,7 +135,7 @@ export async function authRoutes(app: FastifyInstance) {
     } catch (err) {
       if (!(err instanceof DiscordAuthError)) throw err
       // ghi rõ Discord trả lời gì (không có bí mật) rồi đưa người dùng về trang đăng nhập với lời nhắn dễ hiểu
-      req.log.warn({ reason: err.reason, status: err.status }, 'đăng nhập Discord thất bại')
+      req.log.warn({ reason: err.reason, status: err.status, detail: err.detail, viaProxy: !!config.discord.apiBase }, 'đăng nhập Discord thất bại')
       const kind = err.reason === 'invalid_client' ? 'config' : err.reason === 'invalid_grant' ? 'expired' : 'discord'
       return back(`/?login_error=${kind}`)
     }

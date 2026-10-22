@@ -13,6 +13,20 @@ Cấu hình nằm trong [`render.yaml`](../render.yaml): một **web service** (
 4. Lấy địa chỉ web (dạng `https://thuy-han-lenh.onrender.com`, có thể có thêm hậu tố) → Discord Developer Portal → OAuth2 → **Add Redirect**: `https://<địa-chỉ-web>/auth/discord/callback` → **Save Changes**.
 5. Mở địa chỉ web → **Đăng nhập bằng Discord**.
 
+## Đăng nhập Discord báo "Discord đang trục trặc" (HTTP 429)
+
+Render dùng chung vài địa chỉ IP ra ngoài cho mọi dịch vụ trong một vùng, và Discord thường chặn các IP này (log Render có dòng `đăng nhập Discord thất bại` với `"status":429`). Cách xử lý: cho 2 lời gọi Discord đi qua một **Cloudflare Worker** miễn phí.
+
+1. Đăng ký / đăng nhập https://dash.cloudflare.com → **Workers & Pages** → **Create** → **Create Worker** → đặt tên (vd `thl-discord`) → **Deploy**.
+2. **Edit code** → xóa code mẫu, dán toàn bộ [`deploy/discord-proxy-worker.js`](../deploy/discord-proxy-worker.js) → **Deploy**.
+3. Worker → **Settings → Variables and Secrets → Add** → loại **Secret**, tên `PROXY_KEY`, giá trị là một chuỗi ngẫu nhiên dài → **Deploy**.
+4. Render → `thuy-han-lenh` → **Environment** → thêm:
+   - `DISCORD_API_BASE` = địa chỉ Worker, dạng `https://thl-discord.<tài-khoản>.workers.dev`
+   - `DISCORD_PROXY_KEY` = đúng chuỗi đã đặt cho `PROXY_KEY`
+   → **Save, rebuild, and deploy**.
+
+Trang cấp quyền Discord vẫn mở thẳng trên trình duyệt người dùng; Worker chỉ chuyển tiếp `POST /oauth2/token` và `GET /users/@me`, từ chối mọi yêu cầu không có khóa.
+
 ## Cập nhật về sau
 
 Mỗi lần `git push` lên nhánh `main`, Render tự build và deploy lại (không mất dữ liệu — dữ liệu nằm trong Postgres).

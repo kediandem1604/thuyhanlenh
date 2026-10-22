@@ -167,6 +167,47 @@ describe('đăng nhập Discord (giả lập API Discord)', () => {
   })
 })
 
+describe('đăng nhập Discord qua trạm chuyển tiếp (Cloudflare Worker) khi IP máy chủ bị Discord chặn', () => {
+  let env: TestEnv
+  const calls: { url: string; key: string | null }[] = []
+  const fakeFetch = (async (url: string | URL, init?: RequestInit) => {
+    const u = String(url)
+    calls.push({ url: u, key: new Headers(init?.headers).get('x-proxy-key') })
+    if (u.endsWith('/oauth2/token')) return new Response(JSON.stringify({ access_token: 'tok', token_type: 'Bearer' }), { status: 200 })
+    if (u.endsWith('/users/@me')) return new Response(JSON.stringify({ id: '777', username: 'quaworker', global_name: 'Qua Worker', avatar: '' }), { status: 200 })
+    return new Response('not found', { status: 404 })
+  }) as typeof fetch
+
+  beforeAll(async () => {
+    env = await makeTestApp(
+      {
+        discord: {
+          clientId: 'cid',
+          clientSecret: 'secret',
+          redirectUri: 'http://localhost:5173/auth/discord/callback',
+          apiBase: 'https://discord-proxy.example.workers.dev',
+          proxyKey: 'khoa-tram',
+        },
+      },
+      fakeFetch,
+    )
+  })
+  afterAll(async () => env.close())
+
+  it('gọi Discord qua địa chỉ trạm, kèm khóa trạm, và đăng nhập thành công', async () => {
+    const start = await env.app.inject({ method: 'GET', url: '/auth/discord/login' })
+    // trang cấp quyền vẫn là discord.com (trình duyệt người dùng mở, không qua trạm)
+    expect(start.headers.location).toContain('https://discord.com/oauth2/authorize')
+    const state = new URL(String(start.headers.location)).searchParams.get('state')!
+    const oauthCookie = String(([] as string[]).concat(start.headers['set-cookie'] as string[]).find((c) => c.startsWith('thl_oauth='))).split(';')[0]
+    const cb = await env.app.inject({ method: 'GET', url: `/auth/discord/callback?code=xyz&state=${state}`, headers: { cookie: oauthCookie } })
+    expect(cb.statusCode).toBe(302)
+    expect(cb.headers.location).toBe('http://localhost:5173/')
+    expect(calls.map((c) => c.url)).toEqual(['https://discord-proxy.example.workers.dev/oauth2/token', 'https://discord-proxy.example.workers.dev/users/@me'])
+    expect(calls.every((c) => c.key === 'khoa-tram')).toBe(true)
+  })
+})
+
 describe('khai lập bang trống (SEED_DEMO=false) bằng Discord', () => {
   let env: TestEnv
   let nextUser = { id: '900', username: 'tosu', global_name: 'Tổ Sư Khai Bang', avatar: '' }
