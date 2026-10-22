@@ -75,8 +75,11 @@ describe('đăng nhập thử + phiên', () => {
 describe('đăng nhập Discord (giả lập API Discord)', () => {
   let env: TestEnv
   let nextUser = { id: '111', username: 'langphong', global_name: 'Lăng Phong', avatar: 'abc' }
+  // phản hồi giả của Discord khi đổi code lấy token (null = thành công)
+  let tokenError: { status: number; body: unknown } | null = null
   const fakeFetch = (async (url: string | URL) => {
     const u = String(url)
+    if (u.endsWith('/oauth2/token') && tokenError) return new Response(JSON.stringify(tokenError.body), { status: tokenError.status })
     if (u.endsWith('/oauth2/token')) return new Response(JSON.stringify({ access_token: 'tok', token_type: 'Bearer' }), { status: 200 })
     if (u.endsWith('/users/@me')) return new Response(JSON.stringify(nextUser), { status: 200 })
     return new Response('not found', { status: 404 })
@@ -98,6 +101,35 @@ describe('đăng nhập Discord (giả lập API Discord)', () => {
     const session = String(([] as string[]).concat(cb.headers['set-cookie'] as string[]).find((c) => c.startsWith('thl_session='))).split(';')[0]
     return { cb, api: client(env.app, session) }
   }
+
+  async function callbackWith(err: { status: number; body: unknown }) {
+    tokenError = err
+    try {
+      const start = await env.app.inject({ method: 'GET', url: '/auth/discord/login' })
+      const state = new URL(String(start.headers.location)).searchParams.get('state')!
+      const oauthCookie = String(([] as string[]).concat(start.headers['set-cookie'] as string[]).find((c) => c.startsWith('thl_oauth='))).split(';')[0]
+      return await env.app.inject({ method: 'GET', url: `/auth/discord/callback?code=xyz&state=${state}`, headers: { cookie: oauthCookie } })
+    } finally {
+      tokenError = null
+    }
+  }
+
+  it('Discord báo sai khóa (invalid_client) → quay về trang đăng nhập với lỗi cấu hình, không hiện JSON thô', async () => {
+    const cb = await callbackWith({ status: 401, body: { error: 'invalid_client' } })
+    expect(cb.statusCode).toBe(302)
+    expect(cb.headers.location).toBe('http://localhost:5173/?login_error=config')
+  })
+
+  it('mã đăng nhập hết hạn / đã dùng (invalid_grant) → báo đăng nhập lại', async () => {
+    const cb = await callbackWith({ status: 400, body: { error: 'invalid_grant', error_description: 'Invalid "code" in request.' } })
+    expect(cb.statusCode).toBe(302)
+    expect(cb.headers.location).toBe('http://localhost:5173/?login_error=expired')
+  })
+
+  it('Discord trục trặc (lỗi khác) → báo thử lại', async () => {
+    const cb = await callbackWith({ status: 503, body: 'upstream' })
+    expect(cb.headers.location).toBe('http://localhost:5173/?login_error=discord')
+  })
 
   it('từ chối callback sai state', async () => {
     const cb = await env.app.inject({ method: 'GET', url: '/auth/discord/callback?code=x&state=sai', headers: { cookie: 'thl_oauth=dung|/' } })

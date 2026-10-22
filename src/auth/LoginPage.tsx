@@ -17,6 +17,9 @@ import { devLogin, discordLogin } from './session'
 const LOGIN_ERRORS: Record<string, string> = {
   denied: 'Bạn đã từ chối cấp quyền trên Discord.',
   state: 'Phiên đăng nhập hết hạn hoặc không hợp lệ, hãy thử lại.',
+  expired: 'Mã đăng nhập Discord đã hết hạn hoặc đã được dùng — bấm đăng nhập lại nhé.',
+  config: 'Máy chủ đang cấu hình sai khóa Discord (Client ID / Client Secret). Báo quản trị viên kiểm tra.',
+  discord: 'Discord đang trục trặc, thử lại sau ít phút.',
 }
 
 // chibi trang trí khi máy chủ không bật đăng nhập thử

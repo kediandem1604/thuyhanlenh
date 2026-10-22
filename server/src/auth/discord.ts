@@ -1,4 +1,26 @@
-import { badRequest } from '../lib/errors'
+/**
+ * Discord từ chối khi đổi code / đọc tài khoản.
+ * `reason` là mã lỗi Discord trả về (vd `invalid_client` = sai Client ID/Secret, `invalid_grant` = code hết hạn hoặc đã dùng)
+ * — không chứa bí mật nên ghi log được.
+ */
+export class DiscordAuthError extends Error {
+  constructor(
+    readonly reason: string,
+    readonly status: number,
+  ) {
+    super(`Discord OAuth thất bại: ${reason} (HTTP ${status})`)
+  }
+}
+
+async function errorReason(res: Response) {
+  try {
+    const body = (await res.json()) as { error?: unknown }
+    if (typeof body?.error === 'string') return body.error
+  } catch {
+    /* không phải JSON */
+  }
+  return `http_${res.status}`
+}
 
 export interface DiscordUser {
   id: string
@@ -31,11 +53,11 @@ export async function fetchDiscordUser(
       redirect_uri: cfg.redirectUri,
     }),
   })
-  if (!tokenRes.ok) throw badRequest('Discord từ chối mã đăng nhập (hết hạn hoặc sai cấu hình).', 'discord_token')
+  if (!tokenRes.ok) throw new DiscordAuthError(await errorReason(tokenRes), tokenRes.status)
   const token = (await tokenRes.json()) as { access_token?: string; token_type?: string }
-  if (!token.access_token) throw badRequest('Discord không trả về access token.', 'discord_token')
+  if (!token.access_token) throw new DiscordAuthError('no_access_token', tokenRes.status)
   const meRes = await fetchImpl(`${API}/users/@me`, { headers: { Authorization: `${token.token_type ?? 'Bearer'} ${token.access_token}` } })
-  if (!meRes.ok) throw badRequest('Không đọc được thông tin tài khoản Discord.', 'discord_user')
+  if (!meRes.ok) throw new DiscordAuthError(`user_${await errorReason(meRes)}`, meRes.status)
   return (await meRes.json()) as DiscordUser
 }
 

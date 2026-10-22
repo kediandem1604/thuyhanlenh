@@ -14,7 +14,7 @@ import { applicationRowToDomain, buildSnapshot } from '../snapshot'
 import { logActivity } from '../modules/shared'
 import { createMember } from '../modules/members'
 import { requireUser } from './context'
-import { authorizeUrl, discordAvatarUrl, fetchDiscordUser } from './discord'
+import { authorizeUrl, DiscordAuthError, discordAvatarUrl, fetchDiscordUser, type DiscordUser } from './discord'
 import { clearSessionCookie, createSession, revokeSession, setSessionCookie } from './sessions'
 
 const OAUTH_COOKIE = 'thl_oauth'
@@ -129,7 +129,16 @@ export async function authRoutes(app: FastifyInstance) {
     if (q.error) return back('/?login_error=denied')
     if (!q.code || !q.state || !state || q.state !== state) return back('/?login_error=state')
 
-    const du = await fetchDiscordUser(app.ctx.fetch, config.discord, q.code)
+    let du: DiscordUser
+    try {
+      du = await fetchDiscordUser(app.ctx.fetch, config.discord, q.code)
+    } catch (err) {
+      if (!(err instanceof DiscordAuthError)) throw err
+      // ghi rõ Discord trả lời gì (không có bí mật) rồi đưa người dùng về trang đăng nhập với lời nhắn dễ hiểu
+      req.log.warn({ reason: err.reason, status: err.status }, 'đăng nhập Discord thất bại')
+      const kind = err.reason === 'invalid_client' ? 'config' : err.reason === 'invalid_grant' ? 'expired' : 'discord'
+      return back(`/?login_error=${kind}`)
+    }
     const displayName = du.global_name || du.username
     const existing = await db().select().from(s.users).where(eq(s.users.discordId, du.id))
     let userId = existing[0]?.id
