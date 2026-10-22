@@ -7,6 +7,30 @@ const bool = (def: boolean) =>
     .optional()
     .transform((v) => (v === undefined || v === '' ? def : ['1', 'true', 'yes', 'on'].includes(v.toLowerCase())))
 
+/**
+ * Địa chỉ trạm chuyển tiếp Discord: bỏ dấu cách, dấu / cuối, tự thêm https:// nếu dán thiếu; để trống = không dùng trạm.
+ * Sai hẳn → báo lỗi nêu đúng tên biến và dạng cần điền (máy chủ dừng ngay thay vì chạy sai).
+ */
+const proxyBase = z.preprocess(
+  (v) => {
+    if (typeof v !== 'string') return v
+    const t = v.trim().replace(/\/+$/, '')
+    if (!t) return undefined
+    return /^https?:\/\//i.test(t) ? t : `https://${t}`
+  },
+  z
+    .string()
+    .refine((u) => {
+      try {
+        const host = new URL(u).hostname
+        return host.includes('.') && !/\s/.test(u)
+      } catch {
+        return false
+      }
+    }, 'DISCORD_API_BASE phải là địa chỉ Worker, dạng https://ten-worker.ten-tai-khoan.workers.dev')
+    .optional(),
+)
+
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   // production: nền tảng (Render, Fly…) cấp PORT; dev: API_PORT (PORT thường bị công cụ dev chiếm cho Vite)
@@ -22,7 +46,7 @@ const EnvSchema = z.object({
   DISCORD_CLIENT_SECRET: z.string().optional(),
   DISCORD_REDIRECT_URI: z.string().optional(),
   // (tùy chọn) trạm chuyển tiếp API Discord — dùng khi IP máy chủ bị Discord chặn 429 (vd Render dùng chung IP)
-  DISCORD_API_BASE: z.string().url().optional(),
+  DISCORD_API_BASE: proxyBase,
   DISCORD_PROXY_KEY: z.string().optional(),
   BOOTSTRAP_LEADER_DISCORD_ID: z.string().optional(),
   DEV_LOGIN: z.string().optional(),
@@ -70,7 +94,7 @@ export function loadConfig(overrides: Partial<Config> = {}, env: NodeJS.ProcessE
           clientId: e.DISCORD_CLIENT_ID,
           clientSecret: e.DISCORD_CLIENT_SECRET,
           redirectUri: e.DISCORD_REDIRECT_URI || `${webOrigin}/auth/discord/callback`,
-          apiBase: e.DISCORD_API_BASE?.replace(/\/$/, '') || undefined,
+          apiBase: e.DISCORD_API_BASE,
           proxyKey: e.DISCORD_PROXY_KEY?.trim() || undefined,
         }
       : null
