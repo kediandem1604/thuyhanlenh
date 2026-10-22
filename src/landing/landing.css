@@ -1,0 +1,151 @@
+/* ================================================================
+   TRANG GIỚI THIỆU — hiệu ứng riêng (chỉ transform / opacity → chạy trên compositor)
+   prefers-reduced-motion: quy tắc chung trong index.css rút mọi animation về 1 khung;
+   các lớp trang trí lặp vô hạn ở đây được ẩn hẳn cho chắc.
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.lp-root) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* cuộn qua phần mở đầu: trăng nền mờ đi để chữ các phần dưới không đè lên mặt trăng sáng (chỉ đổi opacity) */
+.ink-moon {
+  transition: opacity 0.6s ease;
+}
+html[data-lp-scrolled] .ink-moon {
+  opacity: 0.16;
+}
+
+/* neo #id không bị thanh đầu trang che */
+.lp-root section[id] {
+  scroll-margin-top: 72px;
+}
+
+/* nút Discord — cùng gradient blurple với nút đăng nhập cũ */
+.lp-discord {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #6d78f7, #5865f2 55%, #4752c4);
+  box-shadow:
+    0 10px 30px -10px #5865f2,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.lp-discord:hover {
+  border-color: transparent;
+  filter: brightness(1.1);
+  box-shadow:
+    0 14px 34px -10px #5865f2,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.lp-discord[aria-disabled="true"] {
+  cursor: progress;
+  filter: saturate(0.75);
+  opacity: 0.8;
+  transform: none;
+}
+
+/* thẻ nổi quanh bộ ba chibi */
+.lp-float {
+  animation: lp-float 7s ease-in-out infinite;
+}
+@keyframes lp-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -9px, 0);
+  }
+}
+
+/* gợi ý cuộn: chấm trượt trong khung chuột */
+.lp-cue-dot {
+  animation: lp-cue 2s ease-in-out infinite;
+}
+@keyframes lp-cue {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: translateY(11px);
+    opacity: 0;
+  }
+}
+
+/* tuyết rơi trong khung Bạch Gia (giới hạn trong thẻ, không phủ toàn màn) */
+.lp-snow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lp-snow i {
+  position: absolute;
+  top: -10px;
+  display: block;
+  border-radius: 50%;
+  background: var(--flake);
+  box-shadow: var(--flake-shadow);
+  opacity: 0;
+  animation: lp-snowfall var(--d, 10s) linear var(--dl, 0s) infinite;
+}
+@keyframes lp-snowfall {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--o, 0.85);
+  }
+  85% {
+    opacity: var(--o, 0.85);
+  }
+  100% {
+    transform: translate3d(var(--x, 14px), 720px, 0);
+    opacity: 0;
+  }
+}
+
+/* chibi ở xưởng: nảy nhẹ mỗi lần đổi dáng */
+.lp-pop {
+  animation: lp-pop 0.45s cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+@keyframes lp-pop {
+  0% {
+    transform: scale(0.9) translateY(6px);
+    opacity: 0.4;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* hỏi đáp: dấu mũi tên xoay khi mở */
+.lp-faq > summary {
+  list-style: none;
+}
+.lp-faq > summary::-webkit-details-marker {
+  display: none;
+}
+.lp-faq[open] .lp-faq-chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-snow,
+  .lp-cue-dot {
+    display: none;
+  }
+  .lp-float,
+  .lp-pop {
+    animation: none;
+  }
+}

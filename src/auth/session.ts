@@ -1,9 +1,12 @@
-import { api, errorMessage } from '@/api/client'
+import { api, errorMessage, isDemoMode } from '@/api/client'
+import { exitDemo } from '@/demo/mode'
 import { useGuild } from '@/store/guild'
 import { toast } from '@/store/ui'
 
 /** Đăng xuất rồi tải lại về trang đầu (xóa sạch dữ liệu trong bộ nhớ). */
 export async function logout() {
+  // đang xem thử: chỉ cần thoát chế độ xem thử, không có phiên thật để huỷ
+  if (isDemoMode()) return exitDemo('/')
   try {
     await api.post('/auth/logout')
   } catch {

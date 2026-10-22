@@ -23,6 +23,8 @@
 - **Đổi tổ chức** ở thẻ trên thanh bên; menu chỉ hiện chức năng tổ chức đó có. Người chưa ở đâu vào **Sảnh Giang Hồ** để tạo nhân vật, nhập mã mời, xin vào bang hoặc tự lập tổ chức.
 - **Link mời** `/moi/<mã>`: mời gia nhập, hoặc mời nhận lại một nhân vật đã có tên sẵn.
 - **Giao diện theo tổ chức**: Kinh Hồng, Bạch Gia, Thanh Ngọc, Hồng Liên, Tử Đằng.
+- **Trang giới thiệu + Vào xem thử**: khách chưa đăng nhập thấy landing page (ba con đường, tính năng, hỏi đáp); nút *Vào xem thử* mở đúng giao diện app với 3 tổ chức mẫu, chạy hoàn toàn trong trình duyệt (`src/demo/`), mọi thao tác ghi bị chặn nhẹ nhàng.
+- **Quản trị hệ thống** (Thiết Lập, chỉ người giữ ghế đứng đầu bang chính): vào bất kỳ tổ chức nào làm người đứng đầu — dùng khi tổ chức không còn ai quản lý.
 
 ### Bang Hội
 | Trang | Đường dẫn | Nội dung |

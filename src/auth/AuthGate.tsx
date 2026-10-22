@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { api, ApiError, getOrgId, setOrgId } from '@/api/client'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { api, ApiError, getOrgId, isDemoMode, setOrgId } from '@/api/client'
 import { connectRealtime } from '@/api/realtime'
 import type { Me, Slice } from '@/domain/api'
 import { useGuild } from '@/store/guild'
@@ -7,9 +7,16 @@ import { useUi } from '@/store/ui'
 import { AuthBackdrop, GateMessage, Splash } from './AuthScreens'
 import { InvitePage, inviteCodeFromPath } from './InvitePage'
 import { LobbyPage } from './LobbyPage'
-import { LoginPage } from './LoginPage'
+import { ensureDemoBackend, enterDemo } from '@/demo/mode'
 
 type Phase = 'checking' | 'login' | 'lobby' | 'invite' | 'ready' | 'offline'
+
+// trang giới thiệu tách gói riêng (người đã đăng nhập không cần) nhưng tải ngay song song với bước kiểm tra phiên
+const loadLanding = () => import('./LandingGate').then((m) => ({ default: m.LandingGate }))
+void loadLanding()
+const LandingGate = lazy(loadLanding)
+
+const PREVIEW_LANDING = typeof location !== 'undefined' && new URLSearchParams(location.search).has('landing')
 
 /**
  * Cổng vào app:
@@ -27,6 +34,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   const check = useCallback(async () => {
     try {
+      // phiên xem thử: dựng máy chủ giả (dữ liệu mẫu) trước khi hỏi "tôi là ai"
+      await ensureDemoBackend()
       let fresh = await api.get<Me>('/api/me')
       // tổ chức đang lưu không còn hợp lệ (đã rời / bị mời ra) → chuyển sang tổ chức đầu tiên của mình
       if (!fresh.member && fresh.orgs.length) {
@@ -61,7 +70,14 @@ export function AuthGate({ children }: { children: ReactNode }) {
     if (phase === 'ready' && !me) setPhase('login')
   }, [phase, me])
 
-  useRealtime(phase === 'ready', reloadKey)
+  // xem thử không có máy chủ thật → không mở kênh realtime
+  useRealtime(phase === 'ready' && !isDemoMode(), reloadKey)
+
+  const startDemo = async () => {
+    await enterDemo()
+    if (location.search) history.replaceState(null, '', location.pathname)
+    await check()
+  }
 
   const leaveInvite = () => {
     setInviteCode(null)
@@ -69,8 +85,15 @@ export function AuthGate({ children }: { children: ReactNode }) {
     void check()
   }
 
+  // máy dev: xem trước trang giới thiệu mà không phải đăng xuất (http://localhost:5173/?landing)
+  const landing = (
+    <Suspense fallback={<Splash text="Đang mở cổng giang hồ…" />}>
+      <LandingGate onLoggedIn={check} onDemo={startDemo} />
+    </Suspense>
+  )
+  if (import.meta.env.DEV && PREVIEW_LANDING && !isDemoMode()) return landing
   if (phase === 'checking') return <Splash text="Đang mở cổng giang hồ…" />
-  if (phase === 'login') return <LoginPage onLoggedIn={check} />
+  if (phase === 'login') return landing
   if (phase === 'invite' && me && inviteCode) return <InvitePage code={inviteCode} me={me} onDone={leaveInvite} />
   if (phase === 'lobby' && me) return <LobbyPage me={me} onRefresh={check} />
   if (phase === 'offline' || (phase === 'ready' && status === 'error'))

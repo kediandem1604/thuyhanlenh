@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Bell, Flower2, Menu, Moon, Search, Sun } from 'lucide-react'
 import type { NavItem } from '@/app/nav'
 import { useNavItems } from '@/app/useNav'
+import { isDemoMode } from '@/api/client'
 import { useGuild, useMemberMap } from '@/store/guild'
 import { useUi } from '@/store/ui'
 import { cn, timeAgo } from '@/lib/utils'
@@ -104,6 +105,13 @@ function Notifications() {
 function RealtimeDot() {
   const rt = useUi((s) => s.realtime)
   const online = useGuild((s) => s.members.filter((m) => m.status === 'online').length)
+  if (isDemoMode())
+    return (
+      <span title="Bản xem thử — dữ liệu mẫu, không đồng bộ máy chủ" className="hidden h-10 items-center gap-1.5 rounded-xl px-2 text-[11.5px] text-gold md:inline-flex">
+        <span className="h-2 w-2 rounded-full bg-gold" />
+        <span className="hidden xl:inline">Xem thử</span>
+      </span>
+    )
   const label = rt === 'open' ? `Đồng bộ trực tiếp · ${online} người đang online` : rt === 'connecting' ? 'Đang kết nối realtime…' : 'Mất kết nối realtime — đang thử lại'
   const color = rt === 'open' ? 'var(--jade)' : rt === 'connecting' ? 'var(--gold)' : 'var(--cinnabar)'
   return (

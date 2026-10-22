@@ -47,6 +47,20 @@ export function setOrgId(id: string | null) {
   }
 }
 
+/* ---------------- Chế độ xem thử: mọi lời gọi API do "máy chủ giả" trong trình duyệt trả lời ---------------- */
+
+export type DemoHandler = (method: string, path: string, body: unknown, orgId: string | null) => Promise<unknown>
+let demoHandler: DemoHandler | null = null
+
+export function setDemoHandler(handler: DemoHandler | null) {
+  demoHandler = handler
+}
+
+/** Đang ở chế độ xem thử (không gọi máy chủ thật) */
+export function isDemoMode() {
+  return demoHandler !== null
+}
+
 interface RequestOptions {
   /** gửi kèm Idempotency-Key (route tạo bản ghi) */
   idempotent?: boolean
@@ -54,6 +68,7 @@ interface RequestOptions {
 }
 
 async function request<T>(method: string, path: string, body?: unknown, opts: RequestOptions = {}): Promise<T> {
+  if (demoHandler) return (await demoHandler(method, path, body, currentOrgId)) as T
   const headers: Record<string, string> = { [CLIENT_HEADER]: CLIENT_ID, Accept: 'application/json' }
   if (currentOrgId) headers[ORG_HEADER] = currentOrgId
   if (method !== 'GET') headers[CSRF_HEADER] = CSRF_VALUE

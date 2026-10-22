@@ -11,6 +11,7 @@ import { Petals } from './Petals'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { CommandPalette } from './CommandPalette'
+import { DemoRibbon } from '@/demo/DemoRibbon'
 
 export function AppShell() {
   const petals = useUi((s) => s.petals)
@@ -27,6 +28,7 @@ export function AppShell() {
       {petals && <Petals />}
       <Sidebar />
       <div className="relative z-10 min-h-dvh lg:pl-[272px]">
+        <DemoRibbon />
         <Topbar />
         <main className="mx-auto max-w-[1440px] px-4 pb-20 pt-6 sm:px-6 lg:px-8">
           <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>

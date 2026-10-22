@@ -69,7 +69,7 @@ export function InkScape({ theme }: { theme?: OrgThemeId } = {}) {
   return (
     <div ref={ref} className="app-backdrop" aria-hidden>
       {/* trăng */}
-      <div className="absolute right-[5%] top-[5%]" style={layer(6)}>
+      <div className="ink-moon absolute right-[5%] top-[5%]" style={layer(6)}>
         <div className="relative h-24 w-24 sm:h-32 sm:w-32">
           {snowy && <div className="fx-moon-halo" />}
           <div
