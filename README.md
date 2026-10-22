@@ -106,6 +106,8 @@ App chỉ xin quyền `identify` (tên + ảnh đại diện), không đọc tin
 
 ## Triển khai (production)
 
+> **Render (đang dùng):** xem [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md) — `render.yaml` dựng sẵn web + Postgres ở Singapore.
+
 Một tiến trình Node chạy cả API lẫn web. Cần PostgreSQL.
 
 ```bash
