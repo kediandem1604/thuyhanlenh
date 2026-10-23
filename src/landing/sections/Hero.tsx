@@ -94,7 +94,9 @@ function Stage() {
 
       {sm && (
         <>
-          <FloatCard className="left-0 top-0 lg:-left-6">
+          {/* hai thẻ hai bên chỉ đủ chỗ khi màn rộng (≥1024px); màn vừa chỉ giữ thẻ giữa dưới */}
+          {wide && (
+            <FloatCard className="left-0 top-0 lg:-left-6">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--gold)_18%,transparent)]">
               <Crown size={15} className="text-gold" />
             </span>
@@ -102,8 +104,10 @@ function Stage() {
               <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">First kill · Ác Mộng</span>
               <span className="block text-[12.5px] font-semibold text-ink">{FIRST_KILL}</span>
             </span>
-          </FloatCard>
-          <FloatCard className="right-0 top-12 lg:-right-6" delay={0.25}>
+            </FloatCard>
+          )}
+          {wide && (
+            <FloatCard className="right-0 top-12 lg:-right-6" delay={0.25}>
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--jade)_18%,transparent)]">
               <CalendarDays size={15} className="text-jade" />
             </span>
@@ -111,7 +115,8 @@ function Stage() {
               <span className="block text-[12.5px] font-semibold text-ink">Bang chiến · 20:30</span>
               <span className="block text-[11.5px] text-muted">22/30 đã điểm danh</span>
             </span>
-          </FloatCard>
+            </FloatCard>
+          )}
           <FloatCard className="bottom-0 left-1/2 -translate-x-1/2" delay={0.5}>
             <span className="seal h-8 w-8 text-[13px]">二姐</span>
             <span className="leading-tight">
