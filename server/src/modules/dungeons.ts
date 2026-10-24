@@ -1,7 +1,7 @@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { DUNGEON_MAP, MODE_IDS } from '@/domain/constants'
+import { DUNGEON_MAP, MODES, MODE_IDS, clearReward } from '@/domain/constants'
 import type { DungeonMode } from '@/domain/types'
 import { requirePerm } from '../auth/context'
 import * as s from '../db/schema'
@@ -10,8 +10,6 @@ import { newId } from '../lib/ids'
 import { audit, credit, getMember, idempotent, logActivity, respond } from './shared'
 
 /** Module Phó bản — ghi nhận lượt clear; tiến độ boss được tính từ bảng clears (snapshot.ts). */
-
-const REWARD_PER_SIZE: Record<DungeonMode, number> = { thuong: 5, 'anh-hung': 8, 'ac-mong': 12 }
 
 const ClearBody = z.object({
   dungeonId: z.string().min(1),
@@ -35,6 +33,8 @@ export async function dungeonRoutes(app: FastifyInstance) {
       if (!dungeon) throw badRequest('Phó bản không tồn tại.')
       const boss = dungeon.bosses.find((b) => b.id === body.bossId)
       if (!boss) throw badRequest(`Boss này không thuộc ${dungeon.name}.`)
+      if (!dungeon.modes.includes(body.mode))
+        throw badRequest(`${dungeon.name} chỉ có bản ${dungeon.modes.map((m) => MODES[m].name).join(' · ')}.`)
       const ids = body.memberIds
       if (new Set(ids).size !== ids.length) throw badRequest('Một người bị chọn hai lần trong đội.')
       if (ids.length > dungeon.size) throw badRequest(`${dungeon.name} chỉ cho phép tối đa ${dungeon.size} người.`)
@@ -75,7 +75,7 @@ export async function dungeonRoutes(app: FastifyInstance) {
           wipes: body.wipes,
           createdBy: me.user.id,
         })
-        const reward = dungeon.size * REWARD_PER_SIZE[body.mode]
+        const reward = clearReward(dungeon, body.mode)
         for (const memberId of ids) {
           await credit(tx, {
             guildId: req.orgId,

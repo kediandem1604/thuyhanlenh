@@ -5,7 +5,7 @@ import { motion } from 'motion/react'
 import { ArrowUpRight, Check, Clock, GraduationCap, MapPin, Megaphone, Pin, PinOff, Plus, Target, Trash, Trophy, Users } from 'lucide-react'
 import { useCan, useCurrentUser, useFeature, useGuild, useMemberMap, useOrgType } from '@/store/guild'
 import { toast } from '@/store/ui'
-import { CLASSES, CLASS_CHART_ORDER, DUNGEONS, MENTOR_STAGES, MODES, MODE_IDS } from '@/domain/constants'
+import { CLASSES, CLASS_CHART_ORDER, DUNGEONS, MENTOR_STAGES, MODES, partyLabel } from '@/domain/constants'
 import type { DungeonMode } from '@/domain/types'
 import { cn, fmt, fmtCompact, fmtDateTime, sum, timeAgo } from '@/lib/utils'
 import { Panel, SectionTitle } from '@/components/ui/Panel'
@@ -30,22 +30,23 @@ export function useDungeonSummary() {
     let total = 0
     let killed = 0
     const rows = DUNGEONS.map((d) => {
+      // chỉ tính các độ khó phó bản đó có (Thiên Hoang Dị Văn chỉ có Thường)
       const byMode = Object.fromEntries(
-        MODE_IDS.map((mode) => {
+        d.modes.map((mode) => {
           const map = progress[d.id]?.[mode] ?? {}
           const k = d.bosses.filter((b) => (map[b.id]?.kills ?? 0) > 0).length
           total += d.bosses.length
           killed += k
           return [mode, k]
         }),
-      ) as Record<DungeonMode, number>
+      ) as Partial<Record<DungeonMode, number>>
       return { d, byMode }
     })
     // mục tiêu: độ khó thấp nhất chưa clear hết của phó bản mới nhất đã có tiến độ (chưa có gì → phó bản đầu tiên)
     let goal: { dungeon: (typeof DUNGEONS)[number]; mode: DungeonMode; next: string } | null = null
     for (const { d, byMode } of [...rows].reverse()) {
-      const mode = MODE_IDS.find((m) => byMode[m] < d.bosses.length)
-      const started = MODE_IDS.some((m) => byMode[m] > 0)
+      const mode = d.modes.find((m) => (byMode[m] ?? 0) < d.bosses.length)
+      const started = d.modes.some((m) => (byMode[m] ?? 0) > 0)
       if (mode && (started || d === DUNGEONS[0])) {
         const map = progress[d.id]?.[mode] ?? {}
         const next = d.bosses.find((b) => (map[b.id]?.kills ?? 0) === 0)
@@ -263,7 +264,7 @@ export function UpcomingEvents({ title = 'Sắp diễn ra', subtitle, limit = 4 
 
 export function DungeonWidget({ title = 'Tiến độ phó bản', compact = false }: { title?: string; compact?: boolean }) {
   const { rows, pct, killed, total, goal } = useDungeonSummary()
-  const visible = compact ? rows.filter(({ d, byMode }) => MODE_IDS.some((m) => byMode[m] > 0) || d === goal?.dungeon) : rows
+  const visible = compact ? rows.filter(({ d, byMode }) => d.modes.some((m) => (byMode[m] ?? 0) > 0) || d === goal?.dungeon) : rows
   return (
     <Panel corners>
       <SectionTitle
@@ -304,17 +305,20 @@ export function DungeonWidget({ title = 'Tiến độ phó bản', compact = fal
                 {d.han[0]}
               </span>
               <span className="truncate font-semibold text-ink">{d.name}</span>
-              <span className="ml-auto shrink-0 text-[11px] text-muted">{d.size} người</span>
+              <span className="ml-auto shrink-0 text-[11px] text-muted">{partyLabel(d)} người</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {MODE_IDS.map((m) => (
-                <div key={m} title={`${MODES[m].name}: ${byMode[m]}/${d.bosses.length} boss`}>
-                  <ProgressBar value={byMode[m]} max={d.bosses.length} color={MODES[m].color} height={5} />
-                  <div className="mt-0.5 text-[10.5px] tabular-nums" style={{ color: byMode[m] === d.bosses.length ? MODES[m].color : 'var(--muted)' }}>
-                    {MODES[m].name} {byMode[m]}/{d.bosses.length}
+            <div className="grid grid-cols-2 gap-2">
+              {d.modes.map((m) => {
+                const k = byMode[m] ?? 0
+                return (
+                  <div key={m} title={`${MODES[m].name}: ${k}/${d.bosses.length} boss`}>
+                    <ProgressBar value={k} max={d.bosses.length} color={MODES[m].color} height={5} />
+                    <div className="mt-0.5 text-[10.5px] tabular-nums" style={{ color: k === d.bosses.length ? MODES[m].color : 'var(--muted)' }}>
+                      {MODES[m].name} {k}/{d.bosses.length}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ))}

@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { motion } from 'motion/react'
 import { ArrowUpRight, CalendarDays, Crown, Flame, ScrollText, Swords, Users } from 'lucide-react'
-import { DUNGEON_MAP } from '@/domain/constants'
+import { DUNGEON_MAP, partyLabel } from '@/domain/constants'
 import { KIMLAN_OATH, kimlanHonorific, themeOf } from '@/domain/orgs'
 import type { Member } from '@/domain/types'
 import { rankLabel, useCan, useCurrentUser, useFeature, useGuild, useMemberMap, useOrg } from '@/store/guild'
@@ -443,7 +443,7 @@ function FormationsWidget() {
                   <div className="min-w-0">
                     <div className="truncate text-[13.5px] font-bold text-ink">{t.name}</div>
                     <div className="truncate text-[11.5px] text-muted">
-                      {d ? `${d.name} · ${d.size} người` : 'Chưa gắn phó bản'} · CL TB {fmtCompact(avg)}
+                      {d ? `${d.name} · ${partyLabel(d)} người` : 'Chưa gắn phó bản'} · CL TB {fmtCompact(avg)}
                     </div>
                   </div>
                   {d && (

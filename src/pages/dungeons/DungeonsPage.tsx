@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { motion } from 'motion/react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Flame, Hourglass, Lock, ScrollText, Skull, Swords, Timer, Trophy, Users } from 'lucide-react'
-import { DUNGEONS, DUNGEON_MAP, MODES, MODE_IDS } from '@/domain/constants'
+import { Flame, Gauge, Hourglass, Lock, ScrollText, Skull, Swords, Timer, Trophy, Users } from 'lucide-react'
+import { DUNGEONS, DUNGEON_MAP, MODES, MODE_IDS, PARTY_SIZE, minPartySize, modeFor, partyLabel } from '@/domain/constants'
 import type { Dungeon, DungeonMode, ProgressMap } from '@/domain/types'
 import { useCan, useGuild, useMemberMap, useOrgType } from '@/store/guild'
 import { useOrgWords } from '@/pages/dashboard/orgWords'
@@ -29,15 +29,20 @@ function killedCount(d: Dungeon, map: Record<string, { kills: number }> | undefi
   return d.bosses.filter((b) => (map?.[b.id]?.kills ?? 0) > 0).length
 }
 
+/** độ khó nên mở: độ khó đầu tiên còn boss chưa hạ, hết rồi thì độ khó cao nhất */
+function nextMode(d: Dungeon, progress: ProgressMap) {
+  return d.modes.find((m) => killedCount(d, progress[d.id]?.[m]) < d.bosses.length) ?? d.modes[d.modes.length - 1]
+}
+
 /**
  * Phó bản mở sẵn khi vào trang: phó bản mới nhất đã có tiến độ mà còn boss chưa hạ,
- * chỉ xét phó bản vừa sĩ số tổ chức (Kim Lan 12 người không mặc định vào phó bản 25 người).
+ * chỉ xét phó bản vừa sĩ số tổ chức (team 7 người không mặc định vào phó bản đoàn cần 8 người).
  */
 function defaultDungeon(progress: ProgressMap, memberCount: number) {
-  const fits = DUNGEONS.filter((d) => d.size <= Math.max(5, memberCount))
+  const fits = DUNGEONS.filter((d) => minPartySize(d) <= Math.max(PARTY_SIZE, memberCount))
   const pool = fits.length ? fits : DUNGEONS
-  const open = (d: Dungeon) => MODE_IDS.some((m) => killedCount(d, progress[d.id]?.[m]) < d.bosses.length)
-  const started = (d: Dungeon) => MODE_IDS.some((m) => killedCount(d, progress[d.id]?.[m]) > 0)
+  const open = (d: Dungeon) => d.modes.some((m) => killedCount(d, progress[d.id]?.[m]) < d.bosses.length)
+  const started = (d: Dungeon) => d.modes.some((m) => killedCount(d, progress[d.id]?.[m]) > 0)
   const newest = [...pool].reverse()
   return newest.find((d) => open(d) && started(d)) ?? newest.find(open) ?? pool[pool.length - 1]
 }
@@ -50,14 +55,15 @@ function DungeonSelector({ selectedId, onSelect }: { selectedId: string; onSelec
   const progress = useGuild((s) => s.progress)
   const memberCount = useGuild((s) => s.members.length)
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {DUNGEONS.map((d, i) => {
-        const total = d.bosses.length * MODE_IDS.length
-        const killed = sum(MODE_IDS.map((m) => killedCount(d, progress[d.id]?.[m])))
+        const total = d.bosses.length * d.modes.length
+        const killed = sum(d.modes.map((m) => killedCount(d, progress[d.id]?.[m])))
         const active = d.id === selectedId
         const pct = total ? (killed / total) * 100 : 0
         // phó bản cần đông hơn sĩ số hiện có
-        const tooBig = memberCount > 0 && d.size > memberCount
+        const need = minPartySize(d)
+        const tooBig = memberCount > 0 && need > memberCount
         return (
           <motion.button
             key={d.id}
@@ -67,7 +73,7 @@ function DungeonSelector({ selectedId, onSelect }: { selectedId: string; onSelec
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.04 * i }}
             className={cn('panel panel-hover relative overflow-hidden p-4 text-left', active && 'corners', tooBig && !active && 'opacity-60')}
-            title={tooBig ? `Cần ${d.size} người — đông hơn sĩ số hiện có (${memberCount})` : undefined}
+            title={tooBig ? `Cần ít nhất ${need} người — đông hơn sĩ số hiện có (${memberCount})` : undefined}
             style={{
               borderColor: active ? alpha(d.color, 0.7) : undefined,
               boxShadow: active ? `var(--shadow), 0 0 0 1px ${alpha(d.color, 0.35)}, 0 12px 36px -12px ${alpha(d.color, 0.55)}` : undefined,
@@ -80,9 +86,16 @@ function DungeonSelector({ selectedId, onSelect }: { selectedId: string; onSelec
             </span>
             <div className="relative flex items-center justify-between">
               <span className="chip !h-5 !px-2 !text-[10.5px]" style={{ color: d.color, borderColor: alpha(d.color, 0.4) }}>
-                <Users size={10} /> {d.size}
+                <Users size={10} /> {partyLabel(d)} người
               </span>
-              {pct === 100 && <Trophy size={14} className="text-gold" />}
+              <span className="flex items-center gap-1.5">
+                {d.modes.map((m) => (
+                  <span key={m} className="han text-[12px] leading-none" style={{ color: MODES[m].color }} title={MODES[m].name}>
+                    {MODES[m].han}
+                  </span>
+                ))}
+                {pct === 100 && <Trophy size={14} className="text-gold" />}
+              </span>
             </div>
             <div className="han relative mt-3 text-[15px] text-muted">{d.han}</div>
             <div className="title-display relative text-[19px] leading-tight text-ink">{d.name}</div>
@@ -115,7 +128,7 @@ function DungeonDetail({ dungeon, mode, onMode }: { dungeon: Dungeon; mode: Dung
     return top.length ? sum(top.map((m) => m.power)) / top.length : 0
   }, [members, dungeon.size])
 
-  const rec = dungeon.recommendedPower[mode]
+  const rec = dungeon.recommendedPower[mode] ?? 0
   const ratio = rec ? topAvg / rec : 0
   const verdict =
     ratio >= 1.05
@@ -126,6 +139,16 @@ function DungeonDetail({ dungeon, mode, onMode }: { dungeon: Dungeon; mode: Dung
 
   const killed = killedCount(dungeon, map)
   const targetIdx = dungeon.bosses.findIndex((b) => (map?.[b.id]?.kills ?? 0) === 0)
+  // Vĩnh Dạ Tinh Đô chia hai khu (Ảo Vực · Thần Vực) → nhóm boss theo khu
+  const zones = useMemo(() => {
+    const out: { zone?: string; bosses: { boss: Dungeon['bosses'][number]; index: number }[] }[] = []
+    dungeon.bosses.forEach((boss, index) => {
+      const last = out[out.length - 1]
+      if (last && last.zone === boss.zone) last.bosses.push({ boss, index })
+      else out.push({ zone: boss.zone, bosses: [{ boss, index }] })
+    })
+    return out
+  }, [dungeon])
 
   return (
     <Panel corners className="relative overflow-hidden p-0">
@@ -141,25 +164,40 @@ function DungeonDetail({ dungeon, mode, onMode }: { dungeon: Dungeon; mode: Dung
       <div className="relative grid grid-cols-[minmax(0,1fr)] gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="min-w-0">
           <div className="eyebrow" style={{ color: dungeon.color }}>
-            {dungeon.han} · Phó bản {dungeon.size} người
+            {dungeon.han} · Phó bản {partyLabel(dungeon)} người{dungeon.level ? ` · cấp ${dungeon.level}` : ''}
           </div>
           <h2 className="title-display text-gold-grad mt-1 text-[34px] sm:text-[40px]">{dungeon.name}</h2>
           <p className="mt-2 max-w-xl text-[13.5px] italic text-ink-2">{dungeon.lore}</p>
-          <div className="mt-4">
-            <Segmented
-              value={mode}
-              onChange={onMode}
-              options={MODE_IDS.map((m) => ({
-                value: m,
-                label: (
-                  <>
-                    <span className="han text-[13px]">{MODES[m].han}</span> {MODES[m].name}
-                  </>
-                ),
-                count: killedCount(dungeon, progress[dungeon.id]?.[m]),
-              }))}
-            />
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {dungeon.modes.length > 1 ? (
+              <Segmented
+                value={mode}
+                onChange={onMode}
+                options={dungeon.modes.map((m) => ({
+                  value: m,
+                  label: (
+                    <>
+                      <span className="han text-[13px]">{MODES[m].han}</span> {MODES[m].name}
+                    </>
+                  ),
+                  count: killedCount(dungeon, progress[dungeon.id]?.[m]),
+                }))}
+              />
+            ) : (
+              <span className="chip !h-9 !px-3 !text-[12.5px]">
+                <span className="han text-[13px]" style={{ color: MODES[mode].color }}>
+                  {MODES[mode].han}
+                </span>
+                Hiện chỉ mở bản {MODES[mode].name}
+              </span>
+            )}
           </div>
+          {dungeon.requirement && (
+            <p className="mt-3 flex max-w-xl items-start gap-2 text-[12.5px] text-ink-2">
+              <Gauge size={14} className="mt-0.5 shrink-0 text-gold" />
+              <span>{dungeon.requirement}</span>
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-[auto_1fr] items-center gap-4 rounded-2xl border border-line bg-black/10 p-4">
@@ -173,8 +211,10 @@ function DungeonDetail({ dungeon, mode, onMode }: { dungeon: Dungeon; mode: Dung
           </ProgressRing>
           <div className="min-w-0 space-y-1.5 text-[12.5px]">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-muted">Chiến lực khuyến nghị</span>
-              <span className="font-bold tabular-nums text-ink">{fmt(rec)}</span>
+              <span className="text-muted" title="Ước tính của Thủy Hàn Lệnh để so đội — không phải con số chính thức của game">
+                Chiến lực gợi ý
+              </span>
+              <span className="font-bold tabular-nums text-ink">{rec ? fmt(rec) : '—'}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted">
@@ -190,9 +230,29 @@ function DungeonDetail({ dungeon, mode, onMode }: { dungeon: Dungeon; mode: Dung
         </div>
       </div>
 
-      <div className="relative grid grid-cols-[minmax(0,1fr)] gap-4 px-5 pb-6 sm:px-6 md:grid-cols-2 xl:grid-cols-4">
-        {dungeon.bosses.map((b, i) => (
-          <BossCard key={`${dungeon.id}-${mode}-${b.id}`} boss={b} index={i} progress={map?.[b.id]} isTarget={i === targetIdx} />
+      <div className="relative space-y-5 px-5 pb-6 sm:px-6">
+        {zones.map((z) => (
+          <section key={z.zone ?? 'all'}>
+            {z.zone && (
+              <div className="mb-2.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+                <span style={{ color: dungeon.color }}>{z.zone}</span>
+                <span className="h-px flex-1 bg-[var(--line)]" />
+                <span className="normal-case tracking-normal">
+                  Ải {z.bosses[0].index + 1}–{z.bosses[z.bosses.length - 1].index + 1}
+                </span>
+              </div>
+            )}
+            <div
+              className={cn(
+                'grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2',
+                z.bosses.length % 3 === 0 ? 'xl:grid-cols-3' : 'xl:grid-cols-4',
+              )}
+            >
+              {z.bosses.map(({ boss, index }) => (
+                <BossCard key={`${dungeon.id}-${mode}-${boss.id}`} boss={boss} index={index} progress={map?.[boss.id]} isTarget={index === targetIdx} />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </Panel>
@@ -411,10 +471,8 @@ export default function DungeonsPage() {
   // mặc định: phó bản mới nhất đang chinh phạt dở, vừa sĩ số
   const [dungeonId, setDungeonId] = useState(() => defaultDungeon(progress, memberCount).id)
   const dungeon = DUNGEON_MAP[dungeonId] ?? DUNGEONS[0]
-  const [mode, setMode] = useState<DungeonMode>(() => {
-    const d = DUNGEON_MAP[dungeonId]
-    return MODE_IDS.find((m) => killedCount(d, progress[d.id]?.[m]) < d.bosses.length) ?? 'thuong'
-  })
+  const [pickedMode, setMode] = useState<DungeonMode>(() => nextMode(dungeon, progress))
+  const mode = modeFor(dungeon, pickedMode)
 
   const canRecord = useCan('clear.record')
   const orgType = useOrgType()
@@ -433,7 +491,7 @@ export default function DungeonsPage() {
   const selectDungeon = (id: string) => {
     setDungeonId(id)
     const d = DUNGEON_MAP[id]
-    setMode(MODE_IDS.find((m) => killedCount(d, progress[d.id]?.[m]) < d.bosses.length) ?? 'ac-mong')
+    if (d) setMode(nextMode(d, progress))
   }
 
   return (
@@ -442,7 +500,7 @@ export default function DungeonsPage() {
         eyebrow="Chinh Chiến · Phó Bản"
         title="Phó Bản Chinh Phạt"
         han="征"
-        description={`Theo dõi từng ải boss qua ba độ khó, khắc ghi first kill và kỷ lục tốc độ của ${w.name}.`}
+        description={`Theo dõi từng ải boss qua từng độ khó, khắc ghi first kill và kỷ lục tốc độ của ${w.name}.`}
         actions={
           <>
             <span className="chip !h-10 !rounded-xl !px-3.5 !text-[12.5px]">

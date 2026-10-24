@@ -108,7 +108,7 @@ export const ENTITY_GROUPS: EntityGroup[] = [
     han: '征',
     color: 'var(--jade)',
     entities: [
-      { name: 'Dungeon / Boss', fields: 'size, recommendedPower, bosses[]' },
+      { name: 'Dungeon / Boss', fields: 'size, minSize, modes[], bosses[]' },
       { name: 'ClearRecord', fields: 'dungeonId, mode, bossId, memberIds[], mvpId' },
       { name: 'WarRecord', fields: 'opponent, result, score, lines[]' },
       { name: 'GuildEvent', fields: 'type, start, capacity, rsvp{}' },

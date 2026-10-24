@@ -108,7 +108,7 @@ export function CreateOrgModal({ open, onClose, initialType = 'team' }: { open: 
 
         <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
           <Field label={`Tên ${info.name}`}>
-            <input className="field" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={type === 'kimlan' ? 'VD: Gia Tộc Họ Lâm' : type === 'team' ? 'VD: Đội Ác Mộng Thứ Năm' : 'VD: Thiên Hạ Hội'} />
+            <input className="field" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={type === 'kimlan' ? 'VD: Gia Tộc Họ Lâm' : type === 'team' ? 'VD: Đội Khai Hoang Thứ Năm' : 'VD: Thiên Hạ Hội'} />
           </Field>
           <Field label="Chữ Hán biểu tượng">
             <input className="field han text-center !text-[20px]" value={han} maxLength={3} onChange={(e) => setHan(e.target.value)} />

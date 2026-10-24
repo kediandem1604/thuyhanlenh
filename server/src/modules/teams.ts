@@ -1,7 +1,7 @@
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { DUNGEON_MAP } from '@/domain/constants'
+import { DUNGEONS, DUNGEON_MAP } from '@/domain/constants'
 import { requirePerm } from '../auth/context'
 import * as s from '../db/schema'
 import { badRequest, notFound } from '../lib/errors'
@@ -10,11 +10,14 @@ import { audit, idempotent, respond } from './shared'
 
 /** Module Đội hình — lưu / xóa mẫu bày trận. */
 
+/** đoàn đông nhất trong game (Vĩnh Dạ Tinh Đô: 12 người) */
+const MAX_SLOTS = Math.max(...DUNGEONS.map((d) => d.size))
+
 const TeamBody = z.object({
   id: z.string().min(1).optional(),
   name: z.string().trim().min(1, 'Hãy đặt tên cho mẫu đội hình.').max(40, 'Tên mẫu tối đa 40 ký tự.'),
   dungeonId: z.string().min(1).optional(),
-  slots: z.array(z.string().min(1).nullable()).min(1, 'Đội hình trống.').max(25, 'Tối đa 25 vị trí.'),
+  slots: z.array(z.string().min(1).nullable()).min(1, 'Đội hình trống.').max(MAX_SLOTS, `Tối đa ${MAX_SLOTS} vị trí.`),
 })
 
 export async function teamRoutes(app: FastifyInstance) {
@@ -24,7 +27,9 @@ export async function teamRoutes(app: FastifyInstance) {
     idempotent(req, reply, async () => {
       const me = requirePerm(req, 'team.manage')
       const body = TeamBody.parse(req.body)
-      if (body.dungeonId && !DUNGEON_MAP[body.dungeonId]) throw badRequest('Phó bản không tồn tại.')
+      const dungeon = body.dungeonId ? DUNGEON_MAP[body.dungeonId] : undefined
+      if (body.dungeonId && !dungeon) throw badRequest('Phó bản không tồn tại.')
+      if (dungeon && body.slots.length > dungeon.size) throw badRequest(`${dungeon.name} chỉ xếp được ${dungeon.size} người.`)
       const ids = body.slots.filter((x): x is string => !!x)
       if (new Set(ids).size !== ids.length) throw badRequest('Một người bị xếp vào hai vị trí.')
       const result = await ctx.db.transaction(async (tx) => {

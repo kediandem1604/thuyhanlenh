@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Loader2, Search, Swords, X } from 'lucide-react'
-import { CLASSES, DUNGEONS, DUNGEON_MAP, MODES, MODE_IDS } from '@/domain/constants'
+import { CLASSES, DUNGEONS, DUNGEON_MAP, MODES, clearReward, minPartySize, modeFor, partyLabel } from '@/domain/constants'
 import type { DungeonMode } from '@/domain/types'
 import { useFeature, useGuild } from '@/store/guild'
 import { useOrgWords } from '@/pages/dashboard/orgWords'
@@ -38,7 +38,7 @@ export function RecordClearModal({
   const w = useOrgWords()
 
   const [dungeonId, setDungeonId] = useState(defaultDungeonId)
-  const [mode, setMode] = useState<DungeonMode>(defaultMode)
+  const [pickedMode, setMode] = useState<DungeonMode>(defaultMode)
   const [bossId, setBossId] = useState('')
   const [duration, setDuration] = useState('6:30')
   const [wipes, setWipes] = useState(0)
@@ -48,6 +48,9 @@ export function RecordClearModal({
   const [busy, setBusy] = useState(false)
 
   const dungeon = DUNGEON_MAP[dungeonId] ?? DUNGEONS[0]
+  // đổi sang phó bản không có độ khó đang chọn (vd Thiên Hoang Dị Văn chỉ có Thường) → tự về độ khó của nó
+  const mode = modeFor(dungeon, pickedMode)
+  const minSize = minPartySize(dungeon)
 
   // mở lại → nạp mặc định
   useEffect(() => {
@@ -131,7 +134,7 @@ export function RecordClearModal({
     setBusy(false)
     if (!r.ok) return toast({ tone: 'error', title: 'Chưa ghi nhận được', desc: r.error })
     const { firstKill, newRecord } = r.data
-    const reward = dungeon.size * (mode === 'ac-mong' ? 12 : mode === 'anh-hung' ? 8 : 5)
+    const reward = clearReward(dungeon, mode)
     if (firstKill) {
       celebrate({ han: '斩', title: 'First Kill!', subtitle: `${boss.name} · ${dungeon.name} (${MODES[mode].name})` })
     } else if (newRecord) {
@@ -174,7 +177,7 @@ export function RecordClearModal({
             <select className="field" value={dungeonId} onChange={(e) => setDungeonId(e.target.value)}>
               {DUNGEONS.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name} · {d.size} người
+                  {d.name} · {partyLabel(d)} người
                 </option>
               ))}
             </select>
@@ -184,7 +187,7 @@ export function RecordClearModal({
             <Segmented
               value={mode}
               onChange={setMode}
-              options={MODE_IDS.map((m) => ({ value: m, label: MODES[m].name }))}
+              options={dungeon.modes.map((m) => ({ value: m, label: MODES[m].name }))}
             />
           </div>
           <div>
@@ -255,8 +258,14 @@ export function RecordClearModal({
         <div className="flex min-h-0 flex-col">
           <div className="mb-2 flex items-center justify-between">
             <span className="label !mb-0">Thành viên tham gia</span>
-            <span className={cn('chip', selected.length === dungeon.size && 'text-gold')}>
+            <span
+              className={cn('chip', selected.length === dungeon.size && 'text-gold')}
+              title={minSize < dungeon.size ? `${dungeon.name} cần ${minSize}–${dungeon.size} người` : undefined}
+            >
               {selected.length}/{dungeon.size}
+              {minSize < dungeon.size && selected.length > 0 && selected.length < minSize && (
+                <span className="text-muted">· cần ≥ {minSize}</span>
+              )}
             </span>
           </div>
           <div className="mb-2 flex flex-wrap gap-2">

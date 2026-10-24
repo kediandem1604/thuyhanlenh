@@ -126,7 +126,8 @@ export interface Bond {
   note: string
 }
 
-export type DungeonMode = 'thuong' | 'anh-hung' | 'ac-mong'
+/** độ khó phó bản trong game (bản 1.3: Thường · Anh Hùng) */
+export type DungeonMode = 'thuong' | 'anh-hung'
 
 export interface Boss {
   id: string
@@ -135,16 +136,28 @@ export interface Boss {
   /** màu chủ đạo cho thẻ boss */
   color: string
   glyph: string
+  /** khu vực trong phó bản (vd Vĩnh Dạ Tinh Đô: Ảo Vực / Thần Vực) */
+  zone?: string
 }
 
 export interface Dungeon {
   id: string
   name: string
   han: string
-  size: 5 | 10 | 25
+  /** số người tối đa của một lượt */
+  size: 6 | 12
+  /** số người tối thiểu để mở phó bản (không ghi = đúng bằng size) */
+  minSize?: number
+  /** cấp nhân vật yêu cầu */
+  level?: number
   lore: string
   color: string
-  recommendedPower: Record<DungeonMode, number>
+  /** các độ khó game đang mở cho phó bản này */
+  modes: DungeonMode[]
+  /** lực chiến trung bình gợi ý — ước tính của app để so đội, không phải số chính thức của game */
+  recommendedPower: Partial<Record<DungeonMode, number>>
+  /** yêu cầu cộng đồng hay dùng (DPS cọc gỗ…) */
+  requirement?: string
   bosses: Boss[]
 }
 

@@ -1,5 +1,5 @@
 import { isNotNull, sql } from 'drizzle-orm'
-import { DUNGEONS, GUILD, MODE_IDS } from '@/domain/constants'
+import { DUNGEONS, GUILD } from '@/domain/constants'
 import { featuresOf, hasFeature } from '@/domain/orgs'
 import type { ClearRecord, Member } from '@/domain/types'
 import type { SeedData } from '@/data/seed'
@@ -213,7 +213,7 @@ async function importOrgTx(tx: Tx, seed: OrgSeed, ctx: ImportCtx) {
   const allClears: ClearRecord[] = [...data.clears]
   const memberIds = data.members.map((m) => m.id)
   for (const dg of DUNGEONS) {
-    for (const mode of MODE_IDS) {
+    for (const mode of dg.modes) {
       for (const boss of dg.bosses) {
         const p = data.progress[dg.id]?.[mode]?.[boss.id]
         if (!p || p.kills <= 0 || !memberIds.length) continue
@@ -243,7 +243,7 @@ async function importOrgTx(tx: Tx, seed: OrgSeed, ctx: ImportCtx) {
             durationSec: i === bestIdx ? best : best + rng.int(5, 170),
             memberIds: team,
             mvpId: rng.pick(team),
-            wipes: mode === 'ac-mong' ? rng.int(0, 6) : rng.int(0, 2),
+            wipes: mode === 'anh-hung' ? rng.int(0, 5) : rng.int(0, 2),
           })
         }
       }

@@ -34,8 +34,8 @@ export const CAST = {
 /** Bộ ba ở đầu trang: trái · giữa (to nhất) · phải */
 export const HERO_TRIO: SampleHero[] = [CAST.tieuDao, CAST.thanhY, CAST.huyetAnh]
 
-/** Đội 5 người đang bày (ô cuối bỏ trống) */
-export const PARTY: (SampleHero | null)[] = [CAST.hanPhong, CAST.thanhY, CAST.huyetAnh, CAST.vanKhe, null]
+/** Tổ 6 người đang bày (ô cuối bỏ trống) */
+export const PARTY: (SampleHero | null)[] = [CAST.hanPhong, CAST.thanhY, CAST.huyetAnh, CAST.vanKhe, CAST.daVu, null]
 
 /** Kim Lan 9/12 — thứ tự theo ghế */
 export const KIMLAN: SampleHero[] = [

@@ -96,11 +96,11 @@ describe('nhiều tổ chức', () => {
   it('Huynh đệ Kim Lan ghi nhận được lượt clear, nhưng không tạo được link mời', async () => {
     const huynh = inOrg(await loginCharacter(env, 'ch-bg04'), BACH)
     const clear = await huynh.post<OkBody<{ firstKill: boolean }>>('/api/clears', {
-      dungeonId: 'lien-van-trai',
+      dungeonId: 'trich-tien-kinh-dao',
       mode: 'thuong',
-      bossId: 'lvt-1',
+      bossId: 'tt-1',
       durationSec: 200,
-      memberIds: ['bg04', 'bg05', 'bg06', 'bg07', 'bg08'],
+      memberIds: ['bg04', 'bg05', 'bg06', 'bg07', 'bg08', 'bg09'],
       mvpId: 'bg04',
       wipes: 0,
     })
@@ -112,7 +112,7 @@ describe('nhiều tổ chức', () => {
 
   it('Kim Lan chỉ hẹn lịch phó bản / boss — không có yến tiệc hay bang chiến', async () => {
     const huynh = inOrg(await loginCharacter(env, 'ch-bg04'), BACH)
-    const ev = { title: 'Cùng đi Liên Vân Trại', start: new Date(Date.now() + 86400_000).toISOString(), durationMin: 60, leaderId: 'bg04', capacity: 10 }
+    const ev = { title: 'Cùng đi Trích Tiên Kinh Đào', start: new Date(Date.now() + 86400_000).toISOString(), durationMin: 60, leaderId: 'bg04', capacity: 10 }
     const war = await huynh.post('/api/events', { ...ev, type: 'guild-war' })
     expect(war.status).toBe(400)
     expect(errorOf(war).message).toMatch(/phó bản hoặc boss/)

@@ -9,8 +9,8 @@ import { recruitWords } from './words'
 import { Panel, SectionTitle } from '@/components/ui/Panel'
 import { ClassBadge, RoleIcon } from '@/components/ui/Badges'
 
-/** Tỉ lệ vai trò lý tưởng cho đội raid 25 người (~3 tank, 5–6 trị liệu, còn lại sát thương) */
-const TARGET: Record<CombatRole, number> = { tank: 0.12, healer: 0.22, dps: 0.66 }
+/** Tỉ lệ vai trò lý tưởng: mỗi tổ 6 người trong game = 1 tank · 1 trị liệu · 4 sát thương */
+const TARGET: Record<CombatRole, number> = { tank: 1 / 6, healer: 1 / 6, dps: 4 / 6 }
 
 export function CriteriaPanel({ members }: { members: Member[] }) {
   const org = useOrg()

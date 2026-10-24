@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
 import { motion } from 'motion/react'
 import { Check, Copy, FolderOpen, Loader2, Lock, Save, Search, Sparkles, Trash, TriangleAlert, Users, WandSparkles } from 'lucide-react'
-import { CLASSES, CLASS_IDS, DUNGEONS, DUNGEON_MAP, MODES, MODE_IDS, ROLES } from '@/domain/constants'
+import { CLASSES, CLASS_IDS, DUNGEONS, DUNGEON_MAP, MODES, PARTY_SIZE, ROLES, minPartySize, modeFor, partyLabel } from '@/domain/constants'
 import type { ClassId, CombatRole, DungeonMode, Member } from '@/domain/types'
 import { useCan, useGuild, useMemberMap, useOrgType } from '@/store/guild'
 import { useOrgWords } from '@/pages/dashboard/orgWords'
@@ -126,13 +126,14 @@ export default function TeamBuilderPage() {
   const orgType = useOrgType()
   const w = useOrgWords()
 
-  // mặc định: phó bản mới nhất vừa sĩ số tổ chức (Kim Lan 12 người → phó bản 10 người, team nhỏ → 5 người)
+  // mặc định: phó bản mới nhất vừa sĩ số tổ chức (Kim Lan 12 người → Vĩnh Dạ Tinh Đô, team 7 người → phó bản 6 người)
   const [dungeonId, setDungeonId] = useState(() => {
-    const fits = DUNGEONS.filter((d) => d.size <= Math.max(5, members.length))
+    const fits = DUNGEONS.filter((d) => minPartySize(d) <= Math.max(PARTY_SIZE, members.length))
     return (fits.at(-1) ?? DUNGEONS[0]).id
   })
-  const [mode, setMode] = useState<DungeonMode>('anh-hung')
+  const [pickedMode, setMode] = useState<DungeonMode>('anh-hung')
   const dungeon = DUNGEON_MAP[dungeonId] ?? DUNGEONS[0]
+  const mode = modeFor(dungeon, pickedMode)
   const size = dungeon.size
   const [slots, setSlots] = useState<(string | null)[]>(() => Array(size).fill(null))
   const [loadedTemplate, setLoadedTemplate] = useState<string | null>(null)
@@ -221,11 +222,11 @@ export default function TeamBuilderPage() {
   }
 
   const copyTeam = async () => {
-    const groups = Math.ceil(size / 5)
+    const groups = Math.ceil(size / PARTY_SIZE)
     const lines = [`【${dungeon.name} · ${MODES[mode].name}】`]
     for (let g = 0; g < groups; g++) {
       const names = slots
-        .slice(g * 5, g * 5 + 5)
+        .slice(g * PARTY_SIZE, (g + 1) * PARTY_SIZE)
         .map((id) => (id && memberMap[id] ? `${memberMap[id].name} (${CLASSES[memberMap[id].classId].name})` : '—'))
       lines.push(`Tổ ${g + 1}: ${names.join(', ')}`)
     }
@@ -280,7 +281,7 @@ export default function TeamBuilderPage() {
     })
   }
 
-  const groups = Math.ceil(size / 5)
+  const groups = Math.ceil(size / PARTY_SIZE)
   const filled = team.length
   const draggingMember = dragging ? memberMap[dragging] : undefined
 
@@ -326,12 +327,12 @@ export default function TeamBuilderPage() {
           >
             {DUNGEONS.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name} · {d.size} người
+                {d.name} · {partyLabel(d)} người
               </option>
             ))}
           </select>
         </div>
-        <Segmented value={mode} onChange={setMode} options={MODE_IDS.map((m) => ({ value: m, label: MODES[m].name }))} />
+        <Segmented value={mode} onChange={setMode} options={dungeon.modes.map((m) => ({ value: m, label: MODES[m].name }))} />
         <div className="flex items-center gap-2 md:ml-auto">
           <span className="chip !h-8 !px-3">
             <Users size={13} className="text-gold" />
@@ -398,7 +399,7 @@ export default function TeamBuilderPage() {
           {/* trận hình */}
           <div className="min-w-0 space-y-4">
             {Array.from({ length: groups }, (_, g) => {
-              const groupMembers = slots.slice(g * 5, g * 5 + 5).filter(Boolean).length
+              const groupMembers = slots.slice(g * PARTY_SIZE, (g + 1) * PARTY_SIZE).filter(Boolean).length
               return (
                 <motion.div key={`${dungeon.id}-${g}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 * g }}>
                   <Panel className="!p-4">
@@ -407,11 +408,13 @@ export default function TeamBuilderPage() {
                         <span className="seal h-7 w-7 text-[15px]">{'一二三四五'[g]}</span>
                         <span className="title-display text-[19px] text-ink">Tổ {g + 1}</span>
                       </div>
-                      <span className="text-[11.5px] tabular-nums text-muted">{groupMembers}/5</span>
+                      <span className="text-[11.5px] tabular-nums text-muted">
+                        {groupMembers}/{PARTY_SIZE}
+                      </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-5">
-                      {Array.from({ length: 5 }, (_, k) => {
-                        const i = g * 5 + k
+                    <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
+                      {Array.from({ length: PARTY_SIZE }, (_, k) => {
+                        const i = g * PARTY_SIZE + k
                         if (i >= size) return null
                         const id = slots[i]
                         return <Slot key={i} index={i} member={id ? memberMap[id] : undefined} hint={SLOT_ROLE[k]} onRemove={removeAt} />
@@ -422,13 +425,13 @@ export default function TeamBuilderPage() {
               )
             })}
             <div className="2xl:hidden">
-              <Analysis team={team} size={size} rec={dungeon.recommendedPower[mode]} />
+              <Analysis team={team} size={size} rec={dungeon.recommendedPower[mode] ?? 0} />
             </div>
           </div>
 
           <div className="hidden 2xl:block">
             <div className="sticky top-20">
-              <Analysis team={team} size={size} rec={dungeon.recommendedPower[mode]} />
+              <Analysis team={team} size={size} rec={dungeon.recommendedPower[mode] ?? 0} />
             </div>
           </div>
         </div>
@@ -454,7 +457,7 @@ export default function TeamBuilderPage() {
                     <div className="min-w-0">
                       <div className="truncate text-[14px] font-bold text-ink">{t.name}</div>
                       <div className="text-[11.5px] text-muted">
-                        {d ? `${d.name} · ${d.size} người` : 'Không rõ phó bản'} · {fmtDate(t.createdAt)}
+                        {d ? `${d.name} · ${partyLabel(d)} người` : 'Không rõ phó bản'} · {fmtDate(t.createdAt)}
                       </div>
                     </div>
                     {active && <span className="chip !h-5 shrink-0 text-gold">Đang dùng</span>}

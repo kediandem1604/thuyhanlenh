@@ -26,7 +26,7 @@ interface SampleEvent {
 }
 
 const EVENTS: SampleEvent[] = [
-  { day: 1, hour: 20, minute: 0, type: 'raid', title: 'Hủy Nặc Thành · Anh Hùng', place: 'Tập trung cổng thành', capacity: 10, base: { yes: 7, maybe: 2, no: 1 }, who: [CAST.hanPhong, CAST.thanhY, CAST.huyetAnh, CAST.vanKhe] },
+  { day: 1, hour: 20, minute: 0, type: 'raid', title: 'Vĩnh Dạ Tinh Đô · Anh Hùng', place: 'Cổng Vĩnh Dạ Tinh Đô', capacity: 12, base: { yes: 9, maybe: 2, no: 1 }, who: [CAST.hanPhong, CAST.thanhY, CAST.huyetAnh, CAST.vanKhe] },
   { day: 2, hour: 20, minute: 30, type: 'guild-war', title: 'Bang chiến tuần', place: 'Chiến trường Biện Kinh', capacity: 30, base: { yes: 22, maybe: 4, no: 2 }, who: [CAST.huyetAnh, CAST.daVu, CAST.kiemTam, CAST.thietCot] },
   { day: 4, hour: 21, minute: 0, type: 'banquet', title: 'Yến tiệc bang', place: 'Bang Hội Đường', capacity: 80, base: { yes: 31, maybe: 9, no: 3 }, who: [CAST.linhNhi, CAST.toMac, CAST.hoaRu, CAST.tieuDao] },
   { day: 5, hour: 19, minute: 30, type: 'boss', title: 'Săn Boss Thế Giới', place: 'Theo hiệu lệnh trên kênh bang', capacity: 20, base: { yes: 12, maybe: 3, no: 0 }, who: [CAST.vanTieu, CAST.kiemTam, CAST.thanhY] },

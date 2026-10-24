@@ -1,8 +1,8 @@
-import { CLASSES } from '@/domain/constants'
+import { CLASSES, PARTY_SIZE } from '@/domain/constants'
 import type { CombatRole, Member } from '@/domain/types'
 
-/** Vai trò gợi ý cho từng vị trí trong một tổ 5 người */
-export const SLOT_ROLE: CombatRole[] = ['tank', 'healer', 'dps', 'dps', 'dps']
+/** Vai trò gợi ý cho từng vị trí trong một tổ 6 người (1 tank · 1 healer · 4 DPS) */
+export const SLOT_ROLE: CombatRole[] = ['tank', 'healer', 'dps', 'dps', 'dps', 'dps']
 
 export function roleOfMember(m: Pick<Member, 'classId'>): CombatRole {
   return CLASSES[m.classId].role
@@ -21,8 +21,9 @@ export function fitSlots(slots: (string | null)[], size: number, exists: (id: st
   return [...unique, ...Array<string | null>(size - unique.length).fill(null)]
 }
 
+/** chỉ tiêu vai trò: mỗi tổ 6 người cần 1 tank + 1 healer, còn lại DPS */
 export function quotas(size: number) {
-  const groups = Math.max(1, Math.floor(size / 5))
+  const groups = Math.max(1, Math.round(size / PARTY_SIZE))
   return { tank: groups, healer: groups, dps: size - groups * 2 }
 }
 
@@ -67,10 +68,11 @@ export function autoFill(members: Member[], size: number): (string | null)[] {
   fill(dps, q.dps)
 
   const slots: (string | null)[] = Array(size).fill(null)
-  const groups = Math.ceil(size / 5)
+  const groups = Math.ceil(size / PARTY_SIZE)
   for (let g = 0; g < groups; g++) {
-    const base = g * 5
-    const order: Member[] = [tanks.shift(), healers.shift(), dps.shift(), dps.shift(), dps.shift()].filter(Boolean) as Member[]
+    const base = g * PARTY_SIZE
+    // mỗi tổ: tank · healer · 4 DPS, đúng thứ tự gợi ý của SLOT_ROLE
+    const order = [tanks.shift(), healers.shift(), ...Array.from({ length: PARTY_SIZE - 2 }, () => dps.shift())].filter(Boolean) as Member[]
     order.forEach((m, i) => {
       if (base + i < size) slots[base + i] = m.id
     })

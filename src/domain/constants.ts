@@ -181,102 +181,83 @@ export const STATUS: Record<MemberStatus, { name: string; color: string }> = {
 }
 
 /* ------------------------------------------------------------------ */
-/* Phó bản (tên hư cấu, lấy cảm hứng từ thế giới Ôn Thụy An)           */
+/* Phó bản — theo game (bản 1.3.3, nguồn: wikinghichthuyhan.com)       */
+/* Phó bản chưa rõ boss (Kiếm Mộng Lâm Uyên, Vũ Dương Thành, Kính Thiên */
+/* Các, bí cảnh…) sẽ bổ sung sau.                                      */
 /* ------------------------------------------------------------------ */
 
 export const MODES: Record<DungeonMode, { name: string; color: string; han: string }> = {
   thuong: { name: 'Thường', color: '#5ec7b0', han: '常' },
   'anh-hung': { name: 'Anh Hùng', color: '#d8b46a', han: '英' },
-  'ac-mong': { name: 'Ác Mộng', color: '#e0523f', han: '魇' },
 }
-export const MODE_IDS: DungeonMode[] = ['thuong', 'anh-hung', 'ac-mong']
+export const MODE_IDS: DungeonMode[] = ['thuong', 'anh-hung']
+
+/** một tổ đội trong game là 6 người; phó bản đoàn 12 người = 2 tổ */
+export const PARTY_SIZE = 6
+
+/** cống hiến mỗi người nhận khi hạ một boss = số người tối đa × hệ số độ khó */
+export const REWARD_PER_SIZE: Record<DungeonMode, number> = { thuong: 5, 'anh-hung': 8 }
+export const clearReward = (d: Dungeon, mode: DungeonMode) => d.size * REWARD_PER_SIZE[mode]
+
+/** số người tối thiểu để mở phó bản */
+export const minPartySize = (d: Dungeon) => d.minSize ?? d.size
+/** nhãn sĩ số: "6" hoặc "8–12" */
+export const partyLabel = (d: Dungeon) => (d.minSize ? `${d.minSize}–${d.size}` : `${d.size}`)
+/** độ khó hợp lệ của phó bản — phó bản không có độ khó này thì lấy độ khó đầu tiên của nó */
+export const modeFor = (d: Dungeon, mode: DungeonMode) => (d.modes.includes(mode) ? mode : d.modes[0])
 
 export const DUNGEONS: Dungeon[] = [
   {
-    id: 'lien-van-trai',
-    name: 'Liên Vân Trại',
-    han: '连云寨',
-    size: 5,
-    color: '#5ec7b0',
-    lore: 'Sơn trại hiểm trở giữa mây ngàn, nơi bọn thảo khấu Hắc Phong chiếm cứ.',
-    recommendedPower: { thuong: 90000, 'anh-hung': 140000, 'ac-mong': 190000 },
+    id: 'trich-tien-kinh-dao',
+    name: 'Trích Tiên Kinh Đào',
+    han: '谪仙惊涛',
+    size: 6,
+    color: '#5fb4d9',
+    lore: 'Phó bản 6 người của Thí Luyện Lưu Phái — vượt sóng dữ, cuối đường là Lý Bạch với Kiếm Đãng Hồng Trần.',
+    modes: ['thuong', 'anh-hung'],
+    recommendedPower: { thuong: 150000, 'anh-hung': 230000 },
+    requirement: 'Anh Hùng: khoảng 6,5 vạn DPS trong bản · khai hoang nên có 9–10 vạn DPS trên cọc Nam Vấn Tuyết',
     bosses: [
-      { id: 'lvt-1', name: 'Hắc Phong Trại Chủ', title: 'Kẻ cướp núi', color: '#5b6b7f', glyph: '风' },
-      { id: 'lvt-2', name: 'Song Đao Quỷ Ảnh', title: 'Thích khách song đao', color: '#7a5aa8', glyph: '影' },
-      { id: 'lvt-3', name: 'Thiết Bối Hùng Vương', title: 'Mãnh thú lưng sắt', color: '#8a5a3a', glyph: '熊' },
+      { id: 'tt-1', name: 'Dư Nhược Mộng', title: 'Sát Na · Ảnh Vệ', color: '#9a7ad9', glyph: '梦' },
+      { id: 'tt-2', name: 'Viên Công', title: 'Long Phi Cửu Thiên', color: '#6c9f7c', glyph: '袁' },
+      { id: 'tt-3', name: 'Lý Bạch', title: 'Kiếm Đãng Hồng Trần', color: '#9fc3e8', glyph: '剑' },
     ],
   },
   {
-    id: 'huy-nac-thanh',
-    name: 'Hủy Nặc Thành',
-    han: '毁诺城',
-    size: 10,
-    color: '#7cc0ff',
-    lore: 'Thành băng giữa tuyết trắng, nơi lời hứa bị phá bỏ và kiếm khí lạnh thấu xương.',
-    recommendedPower: { thuong: 130000, 'anh-hung': 190000, 'ac-mong': 250000 },
+    id: 'thien-hoang-di-van',
+    name: 'Thiên Hoang Dị Văn',
+    han: '天荒异闻',
+    size: 6,
+    color: '#d08a4b',
+    lore: 'Phó bản 6 người, rơi trang bị cấp 87–89 và nhẫn Độc Trân cấp 87.',
+    modes: ['thuong'],
+    recommendedPower: { thuong: 200000 },
     bosses: [
-      { id: 'hnt-1', name: 'Băng Phách Thị Vệ', title: 'Vệ binh băng giá', color: '#5f8fbf', glyph: '冰' },
-      { id: 'hnt-2', name: 'Tuyết Ảnh Kiếm Cơ', title: 'Kiếm cơ tuyết ảnh', color: '#9fc3e8', glyph: '雪' },
-      { id: 'hnt-3', name: 'Thành Chủ Hủy Nặc', title: 'Chủ nhân thành băng', color: '#c9e2ff', glyph: '诺' },
+      { id: 'thd-1', name: 'Diệp Kinh Huyền', title: 'Linh Lộc · mưa tên', color: '#7fb069', glyph: '箭' },
+      { id: 'thd-2', name: 'Nhạc Đại Lực', title: 'Cơ Quan Nhân', color: '#b08a5a', glyph: '力' },
+      { id: 'thd-3', name: 'Hắc Lân Mãnh Giao', title: 'Cầu nước · sấm sét', color: '#3f6fbf', glyph: '蛟' },
+      { id: 'thd-4', name: 'Đàm Đài Diệt Trần', title: 'Thánh Hỏa · Phong Hỏa Luân', color: '#e0523f', glyph: '火' },
     ],
   },
   {
-    id: 'kim-phong-lau',
-    name: 'Kim Phong Tế Vũ Lâu',
-    han: '金风细雨楼',
-    size: 10,
-    color: '#d8b46a',
-    lore: 'Tòa lầu quyền lực bậc nhất Biện Kinh, gió vàng mưa bụi che giấu muôn vàn ám tiễn.',
-    recommendedPower: { thuong: 160000, 'anh-hung': 220000, 'ac-mong': 290000 },
-    bosses: [
-      { id: 'kpl-1', name: 'Sứ Giả Lục Phân', title: 'Mật thám nửa đường', color: '#b5893e', glyph: '使' },
-      { id: 'kpl-2', name: 'Phong Vũ Song Sát', title: 'Song sát gió mưa', color: '#6c8f7c', glyph: '雨' },
-      { id: 'kpl-3', name: 'Hồng Lâu Ám Chủ', title: 'Kẻ đứng sau màn', color: '#c0392b', glyph: '楼' },
-    ],
-  },
-  {
-    id: 'thien-lao',
-    name: 'Thiên Lao Biện Kinh',
-    han: '汴京天牢',
-    size: 25,
-    color: '#e0523f',
-    lore: 'Ngục sâu dưới lòng kinh thành, giam giữ những kẻ không bao giờ được thấy ánh mặt trời.',
-    recommendedPower: { thuong: 200000, 'anh-hung': 260000, 'ac-mong': 340000 },
-    bosses: [
-      { id: 'tl-1', name: 'Ngục Tốt Thiết Diện', title: 'Cai ngục mặt sắt', color: '#6b6f7a', glyph: '狱' },
-      { id: 'tl-2', name: 'Độc Thủ Dược Vương', title: 'Bậc thầy độc dược', color: '#4f9a5b', glyph: '毒' },
-      { id: 'tl-3', name: 'Cửu U Ma Tăng', title: 'Ma tăng chín cõi', color: '#7a4a9a', glyph: '魔' },
-      { id: 'tl-4', name: 'Huyết Y Hầu', title: 'Hầu tước áo máu', color: '#a3242f', glyph: '血' },
-    ],
-  },
-  {
-    id: 'tay-ha-lang',
-    name: 'Tây Hạ Hoàng Lăng',
-    han: '西夏皇陵',
-    size: 25,
-    color: '#f08a4b',
-    lore: 'Lăng mộ hoàng gia vùi trong cát vàng, linh hồn đế vương vẫn chưa yên nghỉ.',
-    recommendedPower: { thuong: 240000, 'anh-hung': 300000, 'ac-mong': 380000 },
-    bosses: [
-      { id: 'thl-1', name: 'Thạch Tượng Thủ Lăng', title: 'Tượng đá giữ lăng', color: '#a08a6a', glyph: '石' },
-      { id: 'thl-2', name: 'Sa Mạc Lang Vương', title: 'Vua sói sa mạc', color: '#c4823e', glyph: '狼' },
-      { id: 'thl-3', name: 'Phi Thiên Huyễn Nữ', title: 'Tiên nữ bích họa', color: '#d9779b', glyph: '飞' },
-      { id: 'thl-4', name: 'Hắc Thủy Đế Hồn', title: 'Tàn hồn đế vương', color: '#3a3f6b', glyph: '帝' },
-    ],
-  },
-  {
-    id: 'cuu-long-uyen',
-    name: 'Cửu Long Uyên',
-    han: '九龙渊',
-    size: 25,
+    id: 'vinh-da-tinh-do',
+    name: 'Vĩnh Dạ Tinh Đô',
+    han: '永夜星都',
+    size: 12,
+    minSize: 8,
+    level: 69,
     color: '#a08cf5',
-    lore: 'Vực sâu chín rồng ngủ say — phó bản mới nhất, chưa bang nào chinh phục Ác Mộng.',
-    recommendedPower: { thuong: 280000, 'anh-hung': 350000, 'ac-mong': 430000 },
+    lore: 'Phó bản đoàn 8–12 người, cấp 69: Ảo Vực ba boss đầu, Thần Vực ba boss sau — trùm cuối Liễu Thương Hải.',
+    modes: ['thuong', 'anh-hung'],
+    recommendedPower: { thuong: 260000, 'anh-hung': 330000 },
+    requirement: 'Ảo Vực bản Thường: đội khai hoang nên có DPS khoảng 10–11 vạn trên cọc gỗ (bản 1.3)',
     bosses: [
-      { id: 'clu-1', name: 'Thanh Long Thủ Vệ', title: 'Hộ vệ rồng xanh', color: '#3f9f8f', glyph: '青' },
-      { id: 'clu-2', name: 'Song Giao Hải Chủ', title: 'Song giao chúa biển', color: '#3f6fbf', glyph: '蛟' },
-      { id: 'clu-3', name: 'Lôi Đình Long Tướng', title: 'Long tướng sấm sét', color: '#c9a23f', glyph: '雷' },
-      { id: 'clu-4', name: 'Cửu Long Chi Mẫu', title: 'Mẹ của chín rồng', color: '#8a5ad9', glyph: '龙' },
+      { id: 'vd-1', name: 'Liên', title: 'Mộ Quang Thánh Triều', color: '#5ec7d0', glyph: '涟', zone: 'Ảo Vực' },
+      { id: 'vd-2', name: 'Nhật Nguyệt Song Thú', title: 'Ngày Nhật Thú · đêm Nguyệt Thú', color: '#d8b46a', glyph: '月', zone: 'Ảo Vực' },
+      { id: 'vd-3', name: 'Thiếu Niên Liễu Tinh Văn', title: 'Hạo Thiên Lạc Tinh', color: '#7c9cff', glyph: '星', zone: 'Ảo Vực' },
+      { id: 'vd-4', name: 'Ác Dịch Tâm Ma', title: 'Tâm ma nơi Thần Vực', color: '#8a4a9a', glyph: '魔', zone: 'Thần Vực' },
+      { id: 'vd-5', name: 'Hỗn Độn', title: 'Hỗn mang chưa phân', color: '#4a5a7a', glyph: '沌', zone: 'Thần Vực' },
+      { id: 'vd-6', name: 'Liễu Thương Hải', title: 'Trùm cuối Thần Vực', color: '#3f8fbf', glyph: '海', zone: 'Thần Vực' },
     ],
   },
 ]
@@ -300,9 +281,9 @@ export const MENTOR_TASK_TEMPLATES: { stage: MentorshipStage; label: string }[] 
   { stage: 0, label: 'Dâng trà và lễ vật cho sư phụ' },
   { stage: 1, label: 'Hoàn thành chuỗi nhiệm vụ Nhập Môn' },
   { stage: 1, label: 'Đạt cấp 60' },
-  { stage: 2, label: 'Cùng sư phụ đánh 3 phó bản 5 người' },
+  { stage: 2, label: 'Cùng sư phụ đánh 3 lượt phó bản 6 người' },
   { stage: 2, label: 'Học xong nội công trấn phái' },
-  { stage: 3, label: 'Clear 1 phó bản 10 người cùng bang' },
+  { stage: 3, label: 'Đi Vĩnh Dạ Tinh Đô cùng đoàn của bang' },
   { stage: 3, label: 'Tham gia 1 trận bang chiến' },
   { stage: 4, label: 'Đạt chiến lực 200.000' },
   { stage: 4, label: 'Cử hành lễ xuất sư' },
@@ -368,10 +349,10 @@ export const APPLICATION_STAGES: { id: ApplicationStage; name: string; color: st
 /* ------------------------------------------------------------------ */
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'first-blood', name: 'Nhất Kiếm Phong Hầu', desc: 'Tham gia first-kill một boss Ác Mộng', icon: '剑', rarity: 'hong', category: 'pve' },
+  { id: 'first-blood', name: 'Nhất Kiếm Phong Hầu', desc: 'Tham gia first-kill một boss Anh Hùng', icon: '剑', rarity: 'hong', category: 'pve' },
   { id: 'raid-100', name: 'Bách Chiến Bất Đãi', desc: 'Clear 100 lượt phó bản', icon: '百', rarity: 'kim', category: 'pve' },
   { id: 'raid-25', name: 'Hành Tẩu Giang Hồ', desc: 'Clear 25 lượt phó bản', icon: '行', rarity: 'tu', category: 'pve' },
-  { id: 'no-death', name: 'Kim Cương Bất Hoại', desc: 'Clear phó bản 25 người không ngã lần nào', icon: '金', rarity: 'kim', category: 'pve' },
+  { id: 'no-death', name: 'Kim Cương Bất Hoại', desc: 'Clear Vĩnh Dạ Tinh Đô không ngã lần nào', icon: '金', rarity: 'kim', category: 'pve' },
   { id: 'speedrun', name: 'Tật Phong Tấn Lôi', desc: 'Phá kỷ lục thời gian của bang', icon: '疾', rarity: 'kim', category: 'pve' },
   { id: 'healer-hero', name: 'Diệu Thủ Hồi Xuân', desc: 'Hồi máu cao nhất trong 10 trận', icon: '春', rarity: 'tu', category: 'pve' },
   { id: 'tank-wall', name: 'Vạn Lý Trường Thành', desc: 'Đỡ đòn chính cho 50 lượt boss', icon: '城', rarity: 'tu', category: 'pve' },

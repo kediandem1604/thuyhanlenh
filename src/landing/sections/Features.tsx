@@ -28,9 +28,9 @@ const ROWS: Row[] = [
     eyebrow: 'Phó bản · Bày trận',
     title: 'Biết ngay tuần này còn boss nào, ai đứng ô nào',
     copy: 'Đánh dấu boss đã hạ theo từng độ khó, khắc ghi first kill của cả nhà và đếm ngược tới mốc reset tuần. Xếp đội hình bằng kéo thả — thiếu tank hay thiếu trị liệu là thấy ngay.',
-    bullets: ['Tiến độ theo Thường · Anh Hùng · Ác Mộng', 'First kill và kỷ lục tốc độ được lưu lại', 'Lưu đội hình thành trận phổ, tuần sau dùng lại'],
+    bullets: ['Đúng phó bản trong game: Vĩnh Dạ Tinh Đô, Trích Tiên Kinh Đào…', 'First kill và kỷ lục tốc độ được lưu lại', 'Lưu đội hình thành trận phổ, tuần sau dùng lại'],
     mock: <DungeonMock />,
-    caption: 'Minh họa: tiến độ ba boss của một phó bản và một đội 5 người đang bày, còn trống một ô sát thương.',
+    caption: 'Minh họa: tiến độ ba boss của Trích Tiên Kinh Đào và một tổ 6 người đang bày, còn trống một ô sát thương.',
   },
   {
     key: 'lich',

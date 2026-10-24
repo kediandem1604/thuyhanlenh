@@ -1,7 +1,7 @@
-// Minh họa: tiến độ phó bản (boss, độ khó, first kill, đếm ngược reset tuần) + bày trận 5 người.
+// Minh họa: tiến độ phó bản (boss, độ khó, first kill, đếm ngược reset tuần) + bày trận một tổ 6 người.
 import { useMemo } from 'react'
 import { Crown, Plus, Target, Timer } from 'lucide-react'
-import { DUNGEONS, MODES, MODE_IDS, ROLES } from '@/domain/constants'
+import { DUNGEONS, MODES, PARTY_SIZE, ROLES } from '@/domain/constants'
 import type { CombatRole } from '@/domain/types'
 import { ProgressBar, ProgressRing } from '@/components/ui/Progress'
 import { Countdown } from '@/components/ui/Countdown'
@@ -13,10 +13,10 @@ import { MockPanel } from './MockPanel'
 import { useSeen } from './useSeen'
 import { PARTY } from './sample'
 
-const DUNGEON = DUNGEONS.find((d) => d.id === 'huy-nac-thanh') ?? DUNGEONS[0]
-/** số độ khó đã hạ của từng boss (Thường → Anh Hùng → Ác Mộng) */
-const CLEARED = [3, 2, 1]
-const TOTAL = DUNGEON.bosses.length * MODE_IDS.length
+const DUNGEON = DUNGEONS.find((d) => d.id === 'trich-tien-kinh-dao') ?? DUNGEONS[0]
+/** số độ khó đã hạ của từng boss (Thường → Anh Hùng) */
+const CLEARED = [2, 2, 1]
+const TOTAL = DUNGEON.bosses.length * DUNGEON.modes.length
 const DONE = CLEARED.reduce((s, n) => s + n, 0)
 
 function BossRow({ i, seen }: { i: number; seen: boolean }) {
@@ -55,8 +55,8 @@ function BossRow({ i, seen }: { i: number; seen: boolean }) {
           <span className="chip shrink-0">Đã hạ</span>
         )}
       </div>
-      <div className="mt-2.5 grid grid-cols-3 gap-2">
-        {MODE_IDS.map((m, k) => (
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
+        {DUNGEON.modes.map((m, k) => (
           <div key={m}>
             <ProgressBar value={seen && k < n ? 1 : 0} max={1} color={MODES[m].color} height={5} />
             <div className="mt-0.5 text-[10.5px]" style={{ color: k < n ? `color-mix(in oklab, ${MODES[m].color} 70%, var(--text))` : 'var(--muted)' }}>
@@ -69,7 +69,7 @@ function BossRow({ i, seen }: { i: number; seen: boolean }) {
   )
 }
 
-const NEED: Record<CombatRole, number> = { tank: 1, healer: 1, dps: 3 }
+const NEED: Record<CombatRole, number> = { tank: 1, healer: 1, dps: PARTY_SIZE - 2 }
 
 function Formation() {
   const counts = useMemo(() => {
@@ -81,7 +81,7 @@ function Formation() {
     <MockPanel
       han="阵"
       title="Bày trận · Đội 1"
-      sub="Liên Vân Trại · 5 người"
+      sub={`${DUNGEON.name} · ${PARTY_SIZE} người`}
       right={
         <span className="hidden items-center gap-2 text-[12px] font-semibold text-ink-2 sm:inline-flex">
           {(Object.keys(NEED) as CombatRole[]).map((r) => (
@@ -92,7 +92,7 @@ function Formation() {
         </span>
       }
     >
-      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6 sm:gap-2">
         {PARTY.map((h, i) =>
           h ? (
             <div

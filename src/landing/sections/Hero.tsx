@@ -11,8 +11,8 @@ import { HERO_TRIO } from '../mocks/sample'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 const RING_TEXT = '江湖令 · 帮会 · 金兰 · 队伍 · 同心 · '
-/** boss đầu của Hủy Nặc Thành — khớp với khung minh họa phó bản bên dưới */
-const FIRST_KILL = (DUNGEONS.find((d) => d.id === 'huy-nac-thanh') ?? DUNGEONS[0]).bosses[0].name
+/** trùm cuối Vĩnh Dạ Tinh Đô (Liễu Thương Hải) */
+const FIRST_KILL = (DUNGEONS.find((d) => d.id === 'vinh-da-tinh-do') ?? DUNGEONS[0]).bosses.at(-1)!.name
 
 const PATH_CHIPS = [
   { theme: 'kinh-hong', han: '帮', name: 'Bang Hội' },
@@ -101,7 +101,7 @@ function Stage() {
               <Crown size={15} className="text-gold" />
             </span>
             <span className="leading-tight">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">First kill · Ác Mộng</span>
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">First kill · Anh Hùng</span>
               <span className="block text-[12.5px] font-semibold text-ink">{FIRST_KILL}</span>
             </span>
             </FloatCard>

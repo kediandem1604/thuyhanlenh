@@ -198,7 +198,7 @@ export function CreateEventModal({
               setTitle(e.target.value)
               setTitleTouched(true)
             }}
-            placeholder="Ví dụ: Thiên Lao · Ác Mộng"
+            placeholder="Ví dụ: Vĩnh Dạ Tinh Đô · Anh Hùng"
           />
         </Field>
 

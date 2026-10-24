@@ -4,7 +4,6 @@ import {
   CLASS_IDS,
   DUNGEONS,
   MENTOR_TASK_TEMPLATES,
-  MODE_IDS,
 } from '@/domain/constants'
 import type {
   Activity,
@@ -156,7 +155,7 @@ const TITLES = [
 
 const BIOS = [
   'Ban ngày đi làm, tối về hành hiệp trượng nghĩa.',
-  'Mục tiêu: clear Ác Mộng Cửu Long Uyên trước Tết.',
+  'Mục tiêu: hạ Liễu Thương Hải bản Anh Hùng trước Tết.',
   'Ai cần hồi máu cứ gọi, có mặt trong 3 giây.',
   'Chuyên đứng mũi chịu sào, boss đánh đâu đỡ đó.',
   'Thích ngắm cảnh Biện Kinh lúc hoàng hôn.',
@@ -180,10 +179,10 @@ const APPLICANT_NAMES = [
 ]
 
 const APPLICANT_MESSAGES = [
-  'Online mỗi tối, muốn vào bang đánh phó bản 25 người cùng mọi người.',
+  'Online mỗi tối, muốn vào bang đi Vĩnh Dạ Tinh Đô đoàn 12 người cùng mọi người.',
   'Từng làm đường chủ ở server cũ, PvP ổn, mong được gia nhập.',
   'Tân thủ, rất mê cốt truyện, mong tìm được sư phụ.',
-  'Healer chính, có kinh nghiệm Ác Mộng Thiên Lao.',
+  'Healer chính, đã qua Ảo Vực Vĩnh Dạ Tinh Đô bản Anh Hùng.',
   'Bạn mình giới thiệu, nghe nói bang vui và đoàn kết lắm.',
   'Muốn tham gia bang chiến tối thứ Bảy, có mic đầy đủ.',
 ]
@@ -427,26 +426,23 @@ export function generateSeed(now = Date.now()): SeedData {
 
   /* ---------- Phó bản ---------- */
   // số boss đã hạ theo phó bản / độ khó
-  const clearedPlan: Record<string, Record<DungeonMode, number>> = {
-    'lien-van-trai': { thuong: 3, 'anh-hung': 3, 'ac-mong': 3 },
-    'huy-nac-thanh': { thuong: 3, 'anh-hung': 3, 'ac-mong': 3 },
-    'kim-phong-lau': { thuong: 3, 'anh-hung': 3, 'ac-mong': 2 },
-    'thien-lao': { thuong: 4, 'anh-hung': 4, 'ac-mong': 3 },
-    'tay-ha-lang': { thuong: 4, 'anh-hung': 3, 'ac-mong': 1 },
-    'cuu-long-uyen': { thuong: 4, 'anh-hung': 2, 'ac-mong': 0 },
+  const clearedPlan: Record<string, Partial<Record<DungeonMode, number>>> = {
+    'trich-tien-kinh-dao': { thuong: 3, 'anh-hung': 3 },
+    'thien-hoang-di-van': { thuong: 4 },
+    'vinh-da-tinh-do': { thuong: 6, 'anh-hung': 3 },
   }
   const progress: ProgressMap = {}
   const clears: ClearRecord[] = []
   DUNGEONS.forEach((d, di) => {
     progress[d.id] = {}
-    MODE_IDS.forEach((mode, mi) => {
-      const killedCount = clearedPlan[d.id][mode]
+    d.modes.forEach((mode, mi) => {
+      const killedCount = clearedPlan[d.id]?.[mode] ?? 0
       const modeMap: Record<string, { kills: number; firstKill?: string; bestTimeSec?: number }> = {}
       d.bosses.forEach((b, bi) => {
         if (bi < killedCount) {
           const ageDays = Math.max(2, (DUNGEONS.length - di) * 32 - mi * 18 - bi * 3 + rng.int(-4, 4))
           const kills = Math.max(1, Math.round(ageDays / 7) + rng.int(0, 3))
-          const baseTime = (d.size === 25 ? 420 : d.size === 10 ? 300 : 180) + mi * 90 + bi * 40
+          const baseTime = (d.size === 12 ? 300 : 180) + mi * 90 + bi * 40
           modeMap[b.id] = { kills, firstKill: isoAgo(now, ageDays * DAY + rng.int(0, 20) * 3600000), bestTimeSec: baseTime - rng.int(0, 60) }
           // ghi lại vài lượt clear gần đây
           const recent = Math.min(kills, 3)
@@ -462,7 +458,7 @@ export function generateSeed(now = Date.now()): SeedData {
               durationSec: baseTime + rng.int(0, 140),
               memberIds: team.map((m) => m.id),
               mvpId: rng.pick(team).id,
-              wipes: mode === 'ac-mong' ? rng.int(0, 6) : rng.int(0, 2),
+              wipes: mode === 'anh-hung' ? rng.int(0, 5) : rng.int(0, 2),
             })
           }
         } else {
@@ -486,10 +482,10 @@ export function generateSeed(now = Date.now()): SeedData {
   const eventPlan: Omit<GuildEvent, 'id' | 'rsvp'>[] = []
   for (const w of [0, 7]) {
     eventPlan.push(
-      { type: 'raid', title: 'Thiên Lao · Ác Mộng', start: at(w + 0, 20, 30), durationMin: 120, location: 'Cổng Thiên Lao, Biện Kinh', leaderId: leaders[0].id, capacity: 25, note: 'Mang đủ thuốc giải độc cho boss 2.' },
+      { type: 'raid', title: 'Vĩnh Dạ Tinh Đô · Anh Hùng', start: at(w + 0, 20, 30), durationMin: 120, location: 'Cổng Vĩnh Dạ Tinh Đô', leaderId: leaders[0].id, capacity: 24, note: 'Hai đoàn 12 người, báo danh trước 20:00 để chia tổ.' },
       { type: 'guild-war', title: 'Bang Chiến · Vòng loại', start: at(w + 1, 20, 0), durationMin: 60, location: 'Chiến trường Bang Hội', leaderId: leaders[1].id, capacity: 40, note: 'Tập trung 19:45, chia 3 cánh.' },
-      { type: 'training', title: 'Dạy tân thủ: Cơ chế Hủy Nặc Thành', start: at(w + 2, 21, 0), durationMin: 60, location: 'Luyện Võ Trường', leaderId: leaders[3].id, capacity: 15, note: 'Ưu tiên đồ đệ đang ở giai đoạn Thực Chiến.' },
-      { type: 'raid', title: 'Cửu Long Uyên · Anh Hùng', start: at(w + 3, 20, 30), durationMin: 150, location: 'Vực Cửu Long', leaderId: leaders[0].id, capacity: 25, note: 'Mục tiêu: hạ Lôi Đình Long Tướng.' },
+      { type: 'training', title: 'Dạy tân thủ: Cơ chế Nhật Nguyệt Song Thú', start: at(w + 2, 21, 0), durationMin: 60, location: 'Luyện Võ Trường', leaderId: leaders[3].id, capacity: 15, note: 'Ưu tiên đồ đệ đang ở giai đoạn Thực Chiến.' },
+      { type: 'raid', title: 'Vĩnh Dạ Tinh Đô · Thường', start: at(w + 3, 20, 30), durationMin: 150, location: 'Cổng Vĩnh Dạ Tinh Đô', leaderId: leaders[0].id, capacity: 24, note: 'Chia hai đoàn 12 người, đoàn 2 ưu tiên người mới.' },
       { type: 'boss', title: 'Boss Thế Giới · Hắc Thủy Huyền Quy', start: at(w + 4, 12, 0), durationMin: 30, location: 'Bờ sông Biện Hà', leaderId: leaders[4].id, capacity: 40, note: 'Tranh last-hit, Thiết Y giữ aggro.' },
       { type: 'guild-war', title: 'Bang Chiến · Công Thành', start: at(w + 5, 20, 0), durationMin: 90, location: 'Thành Biện Kinh', leaderId: leaders[1].id, capacity: 40, note: 'Trận quan trọng nhất tuần, toàn bang tham gia!' },
       { type: 'tournament', title: 'Đại Hội Tỉ Võ', start: at(w + 5, 15, 0), durationMin: 120, location: 'Lôi Đài Biện Kinh', leaderId: leaders[2].id, capacity: 10, note: 'Đăng ký đại diện bang.' },
@@ -629,8 +625,8 @@ export function generateSeed(now = Date.now()): SeedData {
   const announcements: Announcement[] = [
     {
       id: 'an1',
-      title: 'Mục tiêu tuần: hạ Lôi Đình Long Tướng (Anh Hùng)',
-      body: 'Tối thứ Năm 20:30 tập trung tại Vực Cửu Long. Thiết Y nhớ mang thuốc kháng lôi, Tố Vấn chia 2 nhóm hồi máu theo sơ đồ đội hình đã lưu.',
+      title: 'Mục tiêu tuần: Vĩnh Dạ Tinh Đô · Anh Hùng',
+      body: 'Tối thứ Hai 20:30 tập trung ở cổng Vĩnh Dạ Tinh Đô, chia hai đoàn 12 người. Thiết Y giữ boss, Tố Vấn chia 2 tổ hồi máu theo đội hình đã lưu.',
       authorId: id(0),
       date: isoAgo(now, 5 * 3600000),
       pinned: true,
@@ -669,9 +665,9 @@ export function generateSeed(now = Date.now()): SeedData {
   const activities: Activity[] = []
   const pushAct = (type: Activity['type'], text: string, hoursAgo: number, memberId?: string) =>
     activities.push({ id: `a${activities.length + 1}`, type, text, date: isoAgo(now, hoursAgo * 3600000), memberId })
-  const fk = clears.find((c) => c.mode === 'ac-mong')
-  pushAct('first-kill', `Bang hạ gục lần đầu Huyết Y Hầu (Ác Mộng)!`, 3, fk?.mvpId)
-  pushAct('clear', `${members[3].name} dẫn đội clear Hủy Nặc Thành · Anh Hùng trong 5:12`, 6, members[3].id)
+  const fk = clears.find((c) => c.bossId === 'vd-3' && c.mode === 'anh-hung')
+  pushAct('first-kill', `Bang hạ gục lần đầu Thiếu Niên Liễu Tinh Văn (Vĩnh Dạ Tinh Đô · Anh Hùng)!`, 3, fk?.mvpId)
+  pushAct('clear', `${members[3].name} dẫn tổ 6 người clear Trích Tiên Kinh Đào · Anh Hùng trong 5:12`, 6, members[3].id)
   pushAct('graduate', `${disciples[disciples.length - 3].name} chính thức xuất sư dưới trướng ${masters[1].name}`, 9, disciples[disciples.length - 3].id)
   pushAct('war', `Thắng bang chiến trước ${wars[0].opponent} với tỉ số ${wars[0].score.join(' - ')}`, 14, wars[0].mvpId)
   pushAct('join', `${members[members.length - 1].name} gia nhập bang, chào mừng tân binh!`, 20, members[members.length - 1].id)
@@ -684,15 +680,16 @@ export function generateSeed(now = Date.now()): SeedData {
   pushAct('event', `Yến tiệc bang tuần trước có 52 người tham gia — kỷ lục mới!`, 96)
 
   /* ---------- Mẫu đội hình ---------- */
+  // đoàn 12 người = 2 tổ 6 người, mỗi tổ 1 tank · 1 healer · 4 DPS
   const tanks = members.filter((m) => CLASSES[m.classId].role === 'tank').slice(0, 2)
   const healers = members.filter((m) => CLASSES[m.classId].role === 'healer').slice(0, 2)
-  const dps = members.filter((m) => CLASSES[m.classId].role === 'dps').slice(0, 6)
+  const dps = members.filter((m) => CLASSES[m.classId].role === 'dps').slice(0, 8)
   const teams: TeamTemplate[] = [
     {
       id: 'team1',
-      name: 'Đội chủ lực · Cửu Long Uyên',
-      dungeonId: 'cuu-long-uyen',
-      slots: [...tanks, ...healers, ...dps].map((m) => m.id).slice(0, 10),
+      name: 'Đoàn chủ lực · Vĩnh Dạ Tinh Đô',
+      dungeonId: 'vinh-da-tinh-do',
+      slots: [0, 1].flatMap((g) => [tanks[g], healers[g], ...dps.slice(g * 4, g * 4 + 4)]).map((m) => m.id),
       createdAt: isoAgo(now, 2 * DAY),
     },
   ]

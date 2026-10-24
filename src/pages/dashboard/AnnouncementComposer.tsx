@@ -54,7 +54,7 @@ export function AnnouncementComposer({ open, onClose, noun = 'cáo thị' }: { o
 
   const placeholder =
     w.type === 'kimlan'
-      ? 'VD: Tối thứ Ba 21:00 cả nhà tập trung ở cổng Hủy Nặc Thành'
+      ? 'VD: Tối thứ Ba 21:00 cả nhà tập trung ở cổng Vĩnh Dạ Tinh Đô'
       : w.type === 'team'
         ? 'VD: Lịch cố định tối thứ Tư 22:00'
         : 'VD: Tập trung bang chiến 19:45 tối nay'

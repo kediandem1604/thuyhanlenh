@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, inArray, isNull, sql } from 'drizzle-orm'
-import { DUNGEONS, MODE_IDS } from '@/domain/constants'
+import { DUNGEONS } from '@/domain/constants'
 import { SLICES, SNAPSHOT_LIMITS, type GuildSnapshot, type Slice } from '@/domain/api'
 import type {
   Activity,
@@ -179,13 +179,14 @@ const loadProgress: Loader<'progress'> = async (db, guildId) => {
   const progress: ProgressMap = {}
   for (const dg of DUNGEONS) {
     progress[dg.id] = {}
-    for (const mode of MODE_IDS) {
+    // chỉ các độ khó phó bản đó có trong game
+    for (const mode of dg.modes) {
       const modeMap: Record<string, { kills: number; firstKill?: string; bestTimeSec?: number }> = {}
       for (const b of dg.bosses) {
         const a = map.get(key(dg.id, mode, b.id))
         modeMap[b.id] = a ? { kills: a.kills, firstKill: new Date(a.firstKill).toISOString(), bestTimeSec: a.best } : { kills: 0 }
       }
-      progress[dg.id]![mode as DungeonMode] = modeMap
+      progress[dg.id]![mode] = modeMap
     }
   }
   return progress
